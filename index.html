@@ -621,132 +621,284 @@
             <!-- Indicators Panel -->
             <div class="panel">
                 <h2>📈 Indicateurs Techniques</h2>
-                <div class="indicators-scroll">
-                    <!-- RSI -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_rsi" onchange="toggleIndicator('rsi')">
-                        <label for="ind_rsi">RSI (Relative Strength Index)</label>
-                    </div>
-                    <div class="indicator-params" id="params_rsi">
-                        <label>Période: <input type="number" value="14" min="1" id="rsi_period"></label>
-                        <label>Suracheté: <input type="number" value="70" min="0" max="100" id="rsi_overbought"></label>
-                        <label>Survendu: <input type="number" value="30" min="0" max="100" id="rsi_oversold"></label>
-                    </div>
+                
+                <!-- Section ACHAT -->
+                <div style="background: rgba(0, 255, 0, 0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #00ff00;">
+                    <h3 style="color: #00ff00; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span>🟢</span> SIGNAUX D'ACHAT
+                    </h3>
+                    <div class="indicators-scroll">
+                        <!-- RSI ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_rsi" onchange="toggleIndicator('buy_rsi')">
+                            <label for="buy_ind_rsi">RSI (Relative Strength Index)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_rsi">
+                            <label>Période: <input type="number" value="14" min="1" id="buy_rsi_period"></label>
+                            <label>Seuil Survendu: <input type="number" value="30" min="0" max="100" id="buy_rsi_oversold"></label>
+                        </div>
 
-                    <!-- MACD -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_macd" onchange="toggleIndicator('macd')">
-                        <label for="ind_macd">MACD (Moving Average Convergence Divergence)</label>
-                    </div>
-                    <div class="indicator-params" id="params_macd">
-                        <label>Fast: <input type="number" value="12" min="1" id="macd_fast"></label>
-                        <label>Slow: <input type="number" value="26" min="1" id="macd_slow"></label>
-                        <label>Signal: <input type="number" value="9" min="1" id="macd_signal"></label>
-                    </div>
+                        <!-- MACD ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_macd" onchange="toggleIndicator('buy_macd')">
+                            <label for="buy_ind_macd">MACD (Croisement Haussier)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_macd">
+                            <label>Fast: <input type="number" value="12" min="1" id="buy_macd_fast"></label>
+                            <label>Slow: <input type="number" value="26" min="1" id="buy_macd_slow"></label>
+                            <label>Signal: <input type="number" value="9" min="1" id="buy_macd_signal"></label>
+                        </div>
 
-                    <!-- Bollinger Bands -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_bb" onchange="toggleIndicator('bb')">
-                        <label for="ind_bb">Bollinger Bands</label>
-                    </div>
-                    <div class="indicator-params" id="params_bb">
-                        <label>Période: <input type="number" value="20" min="1" id="bb_period"></label>
-                        <label>Dév. Standard: <input type="number" value="2" step="0.1" id="bb_stddev"></label>
-                    </div>
+                        <!-- Bollinger Bands ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_bb" onchange="toggleIndicator('buy_bb')">
+                            <label for="buy_ind_bb">Bollinger Bands (Prix sous bande inférieure)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_bb">
+                            <label>Période: <input type="number" value="20" min="1" id="buy_bb_period"></label>
+                            <label>Dév. Standard: <input type="number" value="2" step="0.1" id="buy_bb_stddev"></label>
+                        </div>
 
-                    <!-- EMA -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_ema" onchange="toggleIndicator('ema')">
-                        <label for="ind_ema">EMA (Exponential Moving Average)</label>
-                    </div>
-                    <div class="indicator-params" id="params_ema">
-                        <label>Période Courte: <input type="number" value="9" min="1" id="ema_short"></label>
-                        <label>Période Longue: <input type="number" value="21" min="1" id="ema_long"></label>
-                    </div>
+                        <!-- EMA ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_ema" onchange="toggleIndicator('buy_ema')">
+                            <label for="buy_ind_ema">EMA (Croisement Haussier)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_ema">
+                            <label>Période Courte: <input type="number" value="9" min="1" id="buy_ema_short"></label>
+                            <label>Période Longue: <input type="number" value="21" min="1" id="buy_ema_long"></label>
+                        </div>
 
-                    <!-- SMA -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_sma" onchange="toggleIndicator('sma')">
-                        <label for="ind_sma">SMA (Simple Moving Average)</label>
-                    </div>
-                    <div class="indicator-params" id="params_sma">
-                        <label>Période Courte: <input type="number" value="10" min="1" id="sma_short"></label>
-                        <label>Période Longue: <input type="number" value="30" min="1" id="sma_long"></label>
-                    </div>
+                        <!-- SMA ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_sma" onchange="toggleIndicator('buy_sma')">
+                            <label for="buy_ind_sma">SMA (Croisement Haussier)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_sma">
+                            <label>Période Courte: <input type="number" value="10" min="1" id="buy_sma_short"></label>
+                            <label>Période Longue: <input type="number" value="30" min="1" id="buy_sma_long"></label>
+                        </div>
 
-                    <!-- Stochastic -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_stoch" onchange="toggleIndicator('stoch')">
-                        <label for="ind_stoch">Stochastic Oscillator</label>
-                    </div>
-                    <div class="indicator-params" id="params_stoch">
-                        <label>%K Période: <input type="number" value="14" min="1" id="stoch_k"></label>
-                        <label>%D Période: <input type="number" value="3" min="1" id="stoch_d"></label>
-                        <label>Suracheté: <input type="number" value="80" id="stoch_high"></label>
-                        <label>Survendu: <input type="number" value="20" id="stoch_low"></label>
-                    </div>
+                        <!-- Stochastic ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_stoch" onchange="toggleIndicator('buy_stoch')">
+                            <label for="buy_ind_stoch">Stochastic (Zone Survente)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_stoch">
+                            <label>%K Période: <input type="number" value="14" min="1" id="buy_stoch_k"></label>
+                            <label>%D Période: <input type="number" value="3" min="1" id="buy_stoch_d"></label>
+                            <label>Seuil Survendu: <input type="number" value="20" id="buy_stoch_low"></label>
+                        </div>
 
-                    <!-- ATR -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_atr" onchange="toggleIndicator('atr')">
-                        <label for="ind_atr">ATR (Average True Range)</label>
-                    </div>
-                    <div class="indicator-params" id="params_atr">
-                        <label>Période: <input type="number" value="14" min="1" id="atr_period"></label>
-                    </div>
+                        <!-- ATR ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_atr" onchange="toggleIndicator('buy_atr')">
+                            <label for="buy_ind_atr">ATR (Volatilité élevée)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_atr">
+                            <label>Période: <input type="number" value="14" min="1" id="buy_atr_period"></label>
+                            <label>Seuil multiplicateur: <input type="number" value="1.5" step="0.1" id="buy_atr_threshold"></label>
+                        </div>
 
-                    <!-- ADX -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_adx" onchange="toggleIndicator('adx')">
-                        <label for="ind_adx">ADX (Average Directional Index)</label>
-                    </div>
-                    <div class="indicator-params" id="params_adx">
-                        <label>Période: <input type="number" value="14" min="1" id="adx_period"></label>
-                    </div>
+                        <!-- ADX ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_adx" onchange="toggleIndicator('buy_adx')">
+                            <label for="buy_ind_adx">ADX (Tendance forte haussière)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_adx">
+                            <label>Période: <input type="number" value="14" min="1" id="buy_adx_period"></label>
+                            <label>Seuil force: <input type="number" value="25" min="0" id="buy_adx_threshold"></label>
+                        </div>
 
-                    <!-- CCI -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_cci" onchange="toggleIndicator('cci')">
-                        <label for="ind_cci">CCI (Commodity Channel Index)</label>
-                    </div>
-                    <div class="indicator-params" id="params_cci">
-                        <label>Période: <input type="number" value="20" min="1" id="cci_period"></label>
-                    </div>
+                        <!-- CCI ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_cci" onchange="toggleIndicator('buy_cci')">
+                            <label for="buy_ind_cci">CCI (Zone Survente)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_cci">
+                            <label>Période: <input type="number" value="20" min="1" id="buy_cci_period"></label>
+                            <label>Seuil Survendu: <input type="number" value="-100" id="buy_cci_oversold"></label>
+                        </div>
 
-                    <!-- Williams %R -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_willr" onchange="toggleIndicator('willr')">
-                        <label for="ind_willr">Williams %R</label>
-                    </div>
-                    <div class="indicator-params" id="params_willr">
-                        <label>Période: <input type="number" value="14" min="1" id="willr_period"></label>
-                    </div>
+                        <!-- Williams %R ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_willr" onchange="toggleIndicator('buy_willr')">
+                            <label for="buy_ind_willr">Williams %R (Survendu)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_willr">
+                            <label>Période: <input type="number" value="14" min="1" id="buy_willr_period"></label>
+                            <label>Seuil Survendu: <input type="number" value="-80" max="0" id="buy_willr_oversold"></label>
+                        </div>
 
-                    <!-- OBV -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_obv" onchange="toggleIndicator('obv')">
-                        <label for="ind_obv">OBV (On Balance Volume)</label>
-                    </div>
+                        <!-- OBV ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_obv" onchange="toggleIndicator('buy_obv')">
+                            <label for="buy_ind_obv">OBV (Volume en hausse)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_obv">
+                            <label>Période comparaison: <input type="number" value="20" min="1" id="buy_obv_period"></label>
+                        </div>
 
-                    <!-- Ichimoku -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_ichimoku" onchange="toggleIndicator('ichimoku')">
-                        <label for="ind_ichimoku">Ichimoku Cloud</label>
-                    </div>
-                    <div class="indicator-params" id="params_ichimoku">
-                        <label>Tenkan: <input type="number" value="9" min="1" id="ich_tenkan"></label>
-                        <label>Kijun: <input type="number" value="26" min="1" id="ich_kijun"></label>
-                        <label>Senkou B: <input type="number" value="52" min="1" id="ich_senkou"></label>
-                    </div>
+                        <!-- Ichimoku ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_ichimoku" onchange="toggleIndicator('buy_ichimoku')">
+                            <label for="buy_ind_ichimoku">Ichimoku Cloud (Au-dessus du nuage)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_ichimoku">
+                            <label>Tenkan: <input type="number" value="9" min="1" id="buy_ich_tenkan"></label>
+                            <label>Kijun: <input type="number" value="26" min="1" id="buy_ich_kijun"></label>
+                            <label>Senkou B: <input type="number" value="52" min="1" id="buy_ich_senkou"></label>
+                        </div>
 
-                    <!-- Parabolic SAR -->
-                    <div class="indicator-group">
-                        <input type="checkbox" id="ind_psar" onchange="toggleIndicator('psar')">
-                        <label for="ind_psar">Parabolic SAR</label>
+                        <!-- Parabolic SAR ACHAT -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="buy_ind_psar" onchange="toggleIndicator('buy_psar')">
+                            <label for="buy_ind_psar">Parabolic SAR (Prix au-dessus)</label>
+                        </div>
+                        <div class="indicator-params" id="params_buy_psar">
+                            <label>Accélération: <input type="number" value="0.02" step="0.01" id="buy_psar_accel"></label>
+                            <label>Max: <input type="number" value="0.2" step="0.01" id="buy_psar_max"></label>
+                        </div>
                     </div>
-                    <div class="indicator-params" id="params_psar">
-                        <label>Accélération: <input type="number" value="0.02" step="0.01" id="psar_accel"></label>
-                        <label>Max: <input type="number" value="0.2" step="0.01" id="psar_max"></label>
+                </div>
+
+                <!-- Section VENTE -->
+                <div style="background: rgba(255, 0, 0, 0.05); padding: 15px; border-radius: 10px; border-left: 4px solid #ff0000;">
+                    <h3 style="color: #ff4444; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span>🔴</span> SIGNAUX DE VENTE
+                    </h3>
+                    <div class="indicators-scroll">
+                        <!-- RSI VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_rsi" onchange="toggleIndicator('sell_rsi')">
+                            <label for="sell_ind_rsi">RSI (Relative Strength Index)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_rsi">
+                            <label>Période: <input type="number" value="14" min="1" id="sell_rsi_period"></label>
+                            <label>Seuil Suracheté: <input type="number" value="70" min="0" max="100" id="sell_rsi_overbought"></label>
+                        </div>
+
+                        <!-- MACD VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_macd" onchange="toggleIndicator('sell_macd')">
+                            <label for="sell_ind_macd">MACD (Croisement Baissier)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_macd">
+                            <label>Fast: <input type="number" value="12" min="1" id="sell_macd_fast"></label>
+                            <label>Slow: <input type="number" value="26" min="1" id="sell_macd_slow"></label>
+                            <label>Signal: <input type="number" value="9" min="1" id="sell_macd_signal"></label>
+                        </div>
+
+                        <!-- Bollinger Bands VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_bb" onchange="toggleIndicator('sell_bb')">
+                            <label for="sell_ind_bb">Bollinger Bands (Prix sur bande supérieure)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_bb">
+                            <label>Période: <input type="number" value="20" min="1" id="sell_bb_period"></label>
+                            <label>Dév. Standard: <input type="number" value="2" step="0.1" id="sell_bb_stddev"></label>
+                        </div>
+
+                        <!-- EMA VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_ema" onchange="toggleIndicator('sell_ema')">
+                            <label for="sell_ind_ema">EMA (Croisement Baissier)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_ema">
+                            <label>Période Courte: <input type="number" value="9" min="1" id="sell_ema_short"></label>
+                            <label>Période Longue: <input type="number" value="21" min="1" id="sell_ema_long"></label>
+                        </div>
+
+                        <!-- SMA VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_sma" onchange="toggleIndicator('sell_sma')">
+                            <label for="sell_ind_sma">SMA (Croisement Baissier)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_sma">
+                            <label>Période Courte: <input type="number" value="10" min="1" id="sell_sma_short"></label>
+                            <label>Période Longue: <input type="number" value="30" min="1" id="sell_sma_long"></label>
+                        </div>
+
+                        <!-- Stochastic VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_stoch" onchange="toggleIndicator('sell_stoch')">
+                            <label for="sell_ind_stoch">Stochastic (Zone Surachat)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_stoch">
+                            <label>%K Période: <input type="number" value="14" min="1" id="sell_stoch_k"></label>
+                            <label>%D Période: <input type="number" value="3" min="1" id="sell_stoch_d"></label>
+                            <label>Seuil Suracheté: <input type="number" value="80" id="sell_stoch_high"></label>
+                        </div>
+
+                        <!-- ATR VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_atr" onchange="toggleIndicator('sell_atr')">
+                            <label for="sell_ind_atr">ATR (Volatilité faible)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_atr">
+                            <label>Période: <input type="number" value="14" min="1" id="sell_atr_period"></label>
+                            <label>Seuil multiplicateur: <input type="number" value="0.5" step="0.1" id="sell_atr_threshold"></label>
+                        </div>
+
+                        <!-- ADX VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_adx" onchange="toggleIndicator('sell_adx')">
+                            <label for="sell_ind_adx">ADX (Tendance forte baissière)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_adx">
+                            <label>Période: <input type="number" value="14" min="1" id="sell_adx_period"></label>
+                            <label>Seuil force: <input type="number" value="25" min="0" id="sell_adx_threshold"></label>
+                        </div>
+
+                        <!-- CCI VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_cci" onchange="toggleIndicator('sell_cci')">
+                            <label for="sell_ind_cci">CCI (Zone Surachat)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_cci">
+                            <label>Période: <input type="number" value="20" min="1" id="sell_cci_period"></label>
+                            <label>Seuil Suracheté: <input type="number" value="100" id="sell_cci_overbought"></label>
+                        </div>
+
+                        <!-- Williams %R VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_willr" onchange="toggleIndicator('sell_willr')">
+                            <label for="sell_ind_willr">Williams %R (Suracheté)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_willr">
+                            <label>Période: <input type="number" value="14" min="1" id="sell_willr_period"></label>
+                            <label>Seuil Suracheté: <input type="number" value="-20" max="0" id="sell_willr_overbought"></label>
+                        </div>
+
+                        <!-- OBV VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_obv" onchange="toggleIndicator('sell_obv')">
+                            <label for="sell_ind_obv">OBV (Volume en baisse)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_obv">
+                            <label>Période comparaison: <input type="number" value="20" min="1" id="sell_obv_period"></label>
+                        </div>
+
+                        <!-- Ichimoku VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_ichimoku" onchange="toggleIndicator('sell_ichimoku')">
+                            <label for="sell_ind_ichimoku">Ichimoku Cloud (En-dessous du nuage)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_ichimoku">
+                            <label>Tenkan: <input type="number" value="9" min="1" id="sell_ich_tenkan"></label>
+                            <label>Kijun: <input type="number" value="26" min="1" id="sell_ich_kijun"></label>
+                            <label>Senkou B: <input type="number" value="52" min="1" id="sell_ich_senkou"></label>
+                        </div>
+
+                        <!-- Parabolic SAR VENTE -->
+                        <div class="indicator-group">
+                            <input type="checkbox" id="sell_ind_psar" onchange="toggleIndicator('sell_psar')">
+                            <label for="sell_ind_psar">Parabolic SAR (Prix en-dessous)</label>
+                        </div>
+                        <div class="indicator-params" id="params_sell_psar">
+                            <label>Accélération: <input type="number" value="0.02" step="0.01" id="sell_psar_accel"></label>
+                            <label>Max: <input type="number" value="0.2" step="0.01" id="sell_psar_max"></label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1319,8 +1471,30 @@
 
         // Toggle indicateur
         function toggleIndicator(name) {
-            const checkbox = document.getElementById('ind_' + name);
+            const checkbox = document.getElementById((name.startsWith('buy_') || name.startsWith('sell_') ? '' : 'ind_') + name);
             const params = document.getElementById('params_' + name);
+            
+            if (!checkbox) {
+                // Nouvelle syntaxe avec buy_ ou sell_
+                const type = name.split('_')[0]; // 'buy' ou 'sell'
+                const indicator = name.substring(type.length + 1); // reste du nom
+                const checkboxNew = document.getElementById(type + '_ind_' + indicator);
+                const paramsNew = document.getElementById('params_' + type + '_' + indicator);
+                
+                if (checkboxNew && paramsNew) {
+                    if (checkboxNew.checked) {
+                        paramsNew.classList.add('active');
+                        if (!activeIndicators[type]) activeIndicators[type] = {};
+                        activeIndicators[type][indicator] = true;
+                    } else {
+                        paramsNew.classList.remove('active');
+                        if (activeIndicators[type]) {
+                            delete activeIndicators[type][indicator];
+                        }
+                    }
+                }
+                return;
+            }
             
             if (checkbox.checked) {
                 params.classList.add('active');
@@ -1406,88 +1580,586 @@
             };
         }
 
+        // Calculer Stochastic
+        function calculateStochastic(prices, kPeriod = 14, dPeriod = 3) {
+            if (prices.length < kPeriod) return null;
+            
+            const recentPrices = prices.slice(-kPeriod);
+            const high = Math.max(...recentPrices);
+            const low = Math.min(...recentPrices);
+            const current = prices[prices.length - 1];
+            
+            const k = ((current - low) / (high - low)) * 100;
+            
+            return { k, d: k }; // Simplifié pour la démo
+        }
+
+        // Calculer ATR (Average True Range)
+        function calculateATR(prices, period = 14) {
+            if (prices.length < period + 1) return null;
+            
+            let trSum = 0;
+            for (let i = prices.length - period; i < prices.length; i++) {
+                const tr = Math.abs(prices[i] - prices[i - 1]);
+                trSum += tr;
+            }
+            
+            return trSum / period;
+        }
+
+        // Calculer ADX (Average Directional Index)
+        function calculateADX(prices, period = 14) {
+            if (prices.length < period + 1) return null;
+            
+            let upMoves = 0, downMoves = 0;
+            
+            for (let i = prices.length - period; i < prices.length; i++) {
+                const diff = prices[i] - prices[i - 1];
+                if (diff > 0) upMoves += diff;
+                else downMoves += Math.abs(diff);
+            }
+            
+            const avgUp = upMoves / period;
+            const avgDown = downMoves / period;
+            
+            if (avgUp + avgDown === 0) return 0;
+            
+            const dx = Math.abs(avgUp - avgDown) / (avgUp + avgDown) * 100;
+            return dx;
+        }
+
+        // Calculer CCI (Commodity Channel Index)
+        function calculateCCI(prices, period = 20) {
+            if (prices.length < period) return null;
+            
+            const sma = calculateSMA(prices, period);
+            const recentPrices = prices.slice(-period);
+            
+            let meanDeviation = 0;
+            for (let price of recentPrices) {
+                meanDeviation += Math.abs(price - sma);
+            }
+            meanDeviation /= period;
+            
+            const currentPrice = prices[prices.length - 1];
+            const cci = (currentPrice - sma) / (0.015 * meanDeviation);
+            
+            return cci;
+        }
+
+        // Calculer Williams %R
+        function calculateWilliamsR(prices, period = 14) {
+            if (prices.length < period) return null;
+            
+            const recentPrices = prices.slice(-period);
+            const high = Math.max(...recentPrices);
+            const low = Math.min(...recentPrices);
+            const current = prices[prices.length - 1];
+            
+            const willR = ((high - current) / (high - low)) * -100;
+            
+            return willR;
+        }
+
+        // Calculer OBV (On Balance Volume) - Simplifié
+        function calculateOBV(prices, period = 20) {
+            if (prices.length < period) return null;
+            
+            let obv = 0;
+            for (let i = prices.length - period; i < prices.length; i++) {
+                if (i > 0) {
+                    if (prices[i] > prices[i - 1]) {
+                        obv += prices[i];
+                    } else if (prices[i] < prices[i - 1]) {
+                        obv -= prices[i];
+                    }
+                }
+            }
+            
+            return obv;
+        }
+
+        // Calculer Ichimoku Cloud
+        function calculateIchimoku(prices, tenkan = 9, kijun = 26, senkou = 52) {
+            if (prices.length < senkou) return null;
+            
+            const calcLine = (period) => {
+                const slice = prices.slice(-period);
+                return (Math.max(...slice) + Math.min(...slice)) / 2;
+            };
+            
+            const tenkanSen = calcLine(tenkan);
+            const kijunSen = calcLine(kijun);
+            const senkouSpanA = (tenkanSen + kijunSen) / 2;
+            const senkouSpanB = calcLine(senkou);
+            
+            return {
+                tenkan: tenkanSen,
+                kijun: kijunSen,
+                senkouA: senkouSpanA,
+                senkouB: senkouSpanB,
+                cloud: (senkouSpanA + senkouSpanB) / 2
+            };
+        }
+
+        // Calculer Parabolic SAR - Simplifié
+        function calculateParabolicSAR(prices, acceleration = 0.02, maximum = 0.2) {
+            if (prices.length < 5) return null;
+            
+            const recentPrices = prices.slice(-5);
+            const trend = prices[prices.length - 1] > prices[prices.length - 5];
+            
+            let sar;
+            if (trend) {
+                // Tendance haussière
+                sar = Math.min(...recentPrices) * (1 - acceleration);
+            } else {
+                // Tendance baissière
+                sar = Math.max(...recentPrices) * (1 + acceleration);
+            }
+            
+            return { sar, trend };
+        }
+
         // Analyser les signaux de trading
         function analyzeSignals(price) {
-            const signals = [];
+            const buySignals = [];
+            const sellSignals = [];
             
             if (priceHistory.length < 50) {
-                return { action: 'HOLD', signals: ['Données insuffisantes'] };
+                return { action: 'HOLD', buySignals: ['Données insuffisantes'], sellSignals: [] };
             }
 
-            // RSI
-            if (activeIndicators.rsi) {
-                const period = parseInt(document.getElementById('rsi_period').value);
-                const overbought = parseInt(document.getElementById('rsi_overbought').value);
-                const oversold = parseInt(document.getElementById('rsi_oversold').value);
+            // ============ SIGNAUX D'ACHAT ============
+            
+            // RSI ACHAT
+            if (activeIndicators.buy && activeIndicators.buy.rsi) {
+                const period = parseInt(document.getElementById('buy_rsi_period').value);
+                const oversold = parseInt(document.getElementById('buy_rsi_oversold').value);
                 
                 const rsi = calculateRSI(priceHistory, period);
-                if (rsi) {
-                    if (rsi < oversold) signals.push({ type: 'BUY', indicator: 'RSI', value: rsi.toFixed(2) });
-                    if (rsi > overbought) signals.push({ type: 'SELL', indicator: 'RSI', value: rsi.toFixed(2) });
+                if (rsi && rsi < oversold) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'RSI', 
+                        value: `${rsi.toFixed(2)} < ${oversold} (Survendu)` 
+                    });
                 }
             }
 
-            // MACD
-            if (activeIndicators.macd) {
-                const fast = parseInt(document.getElementById('macd_fast').value);
-                const slow = parseInt(document.getElementById('macd_slow').value);
+            // MACD ACHAT (Croisement haussier)
+            if (activeIndicators.buy && activeIndicators.buy.macd) {
+                const fast = parseInt(document.getElementById('buy_macd_fast').value);
+                const slow = parseInt(document.getElementById('buy_macd_slow').value);
                 
                 const macd = calculateMACD(priceHistory, fast, slow);
-                if (macd) {
-                    if (macd.histogram > 0) signals.push({ type: 'BUY', indicator: 'MACD', value: macd.histogram.toFixed(4) });
-                    if (macd.histogram < 0) signals.push({ type: 'SELL', indicator: 'MACD', value: macd.histogram.toFixed(4) });
+                if (macd && macd.histogram > 0) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'MACD', 
+                        value: `Histogram: ${macd.histogram.toFixed(4)} (Haussier)` 
+                    });
                 }
             }
 
-            // Bollinger Bands
-            if (activeIndicators.bb) {
-                const period = parseInt(document.getElementById('bb_period').value);
-                const stddev = parseFloat(document.getElementById('bb_stddev').value);
+            // Bollinger Bands ACHAT (Prix sous bande inférieure)
+            if (activeIndicators.buy && activeIndicators.buy.bb) {
+                const period = parseInt(document.getElementById('buy_bb_period').value);
+                const stddev = parseFloat(document.getElementById('buy_bb_stddev').value);
                 
                 const bb = calculateBollingerBands(priceHistory, period, stddev);
-                if (bb) {
-                    if (price < bb.lower) signals.push({ type: 'BUY', indicator: 'BB', value: 'Prix sous bande inf.' });
-                    if (price > bb.upper) signals.push({ type: 'SELL', indicator: 'BB', value: 'Prix sur bande sup.' });
+                if (bb && price < bb.lower) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'BB', 
+                        value: `Prix ${price.toFixed(2)} < Bande inf. ${bb.lower.toFixed(2)}` 
+                    });
                 }
             }
 
-            // EMA Crossover
-            if (activeIndicators.ema) {
-                const shortPeriod = parseInt(document.getElementById('ema_short').value);
-                const longPeriod = parseInt(document.getElementById('ema_long').value);
+            // EMA Crossover ACHAT
+            if (activeIndicators.buy && activeIndicators.buy.ema) {
+                const shortPeriod = parseInt(document.getElementById('buy_ema_short').value);
+                const longPeriod = parseInt(document.getElementById('buy_ema_long').value);
                 
                 const emaShort = calculateEMA(priceHistory, shortPeriod);
                 const emaLong = calculateEMA(priceHistory, longPeriod);
                 
-                if (emaShort && emaLong) {
-                    if (emaShort > emaLong) signals.push({ type: 'BUY', indicator: 'EMA', value: 'Croisement haussier' });
-                    if (emaShort < emaLong) signals.push({ type: 'SELL', indicator: 'EMA', value: 'Croisement baissier' });
+                if (emaShort && emaLong && emaShort > emaLong) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'EMA', 
+                        value: `EMA${shortPeriod} > EMA${longPeriod} (Croisement haussier)` 
+                    });
                 }
             }
 
-            // SMA Crossover
-            if (activeIndicators.sma) {
-                const shortPeriod = parseInt(document.getElementById('sma_short').value);
-                const longPeriod = parseInt(document.getElementById('sma_long').value);
+            // SMA Crossover ACHAT
+            if (activeIndicators.buy && activeIndicators.buy.sma) {
+                const shortPeriod = parseInt(document.getElementById('buy_sma_short').value);
+                const longPeriod = parseInt(document.getElementById('buy_sma_long').value);
                 
                 const smaShort = calculateSMA(priceHistory, shortPeriod);
                 const smaLong = calculateSMA(priceHistory, longPeriod);
                 
-                if (smaShort && smaLong) {
-                    if (smaShort > smaLong) signals.push({ type: 'BUY', indicator: 'SMA', value: 'Croisement haussier' });
-                    if (smaShort < smaLong) signals.push({ type: 'SELL', indicator: 'SMA', value: 'Croisement baissier' });
+                if (smaShort && smaLong && smaShort > smaLong) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'SMA', 
+                        value: `SMA${shortPeriod} > SMA${longPeriod} (Croisement haussier)` 
+                    });
+                }
+            }
+
+            // Stochastic ACHAT
+            if (activeIndicators.buy && activeIndicators.buy.stoch) {
+                const kPeriod = parseInt(document.getElementById('buy_stoch_k').value);
+                const oversold = parseInt(document.getElementById('buy_stoch_low').value);
+                
+                const stoch = calculateStochastic(priceHistory, kPeriod);
+                if (stoch && stoch.k < oversold) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'Stochastic', 
+                        value: `%K ${stoch.k.toFixed(2)} < ${oversold} (Survendu)` 
+                    });
+                }
+            }
+
+            // ATR ACHAT (Volatilité élevée = opportunité)
+            if (activeIndicators.buy && activeIndicators.buy.atr) {
+                const period = parseInt(document.getElementById('buy_atr_period').value);
+                const threshold = parseFloat(document.getElementById('buy_atr_threshold').value);
+                
+                const atr = calculateATR(priceHistory, period);
+                const avgPrice = calculateSMA(priceHistory, period);
+                
+                if (atr && avgPrice && (atr / avgPrice) > (threshold / 100)) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'ATR', 
+                        value: `Volatilité élevée: ${((atr/avgPrice)*100).toFixed(2)}%` 
+                    });
+                }
+            }
+
+            // ADX ACHAT (Tendance forte)
+            if (activeIndicators.buy && activeIndicators.buy.adx) {
+                const period = parseInt(document.getElementById('buy_adx_period').value);
+                const threshold = parseInt(document.getElementById('buy_adx_threshold').value);
+                
+                const adx = calculateADX(priceHistory, period);
+                const recentTrend = priceHistory[priceHistory.length - 1] > priceHistory[priceHistory.length - period];
+                
+                if (adx && adx > threshold && recentTrend) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'ADX', 
+                        value: `Tendance forte: ${adx.toFixed(2)} > ${threshold}` 
+                    });
+                }
+            }
+
+            // CCI ACHAT
+            if (activeIndicators.buy && activeIndicators.buy.cci) {
+                const period = parseInt(document.getElementById('buy_cci_period').value);
+                const oversold = parseInt(document.getElementById('buy_cci_oversold').value);
+                
+                const cci = calculateCCI(priceHistory, period);
+                if (cci && cci < oversold) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'CCI', 
+                        value: `${cci.toFixed(2)} < ${oversold} (Survendu)` 
+                    });
+                }
+            }
+
+            // Williams %R ACHAT
+            if (activeIndicators.buy && activeIndicators.buy.willr) {
+                const period = parseInt(document.getElementById('buy_willr_period').value);
+                const oversold = parseInt(document.getElementById('buy_willr_oversold').value);
+                
+                const willr = calculateWilliamsR(priceHistory, period);
+                if (willr && willr < oversold) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'Williams %R', 
+                        value: `${willr.toFixed(2)} < ${oversold} (Survendu)` 
+                    });
+                }
+            }
+
+            // OBV ACHAT
+            if (activeIndicators.buy && activeIndicators.buy.obv) {
+                const period = parseInt(document.getElementById('buy_obv_period').value);
+                
+                const obv = calculateOBV(priceHistory, period);
+                const obvPrev = calculateOBV(priceHistory.slice(0, -5), period);
+                
+                if (obv && obvPrev && obv > obvPrev) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'OBV', 
+                        value: `Volume en hausse` 
+                    });
+                }
+            }
+
+            // Ichimoku ACHAT
+            if (activeIndicators.buy && activeIndicators.buy.ichimoku) {
+                const tenkan = parseInt(document.getElementById('buy_ich_tenkan').value);
+                const kijun = parseInt(document.getElementById('buy_ich_kijun').value);
+                const senkou = parseInt(document.getElementById('buy_ich_senkou').value);
+                
+                const ichimoku = calculateIchimoku(priceHistory, tenkan, kijun, senkou);
+                if (ichimoku && price > ichimoku.cloud) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'Ichimoku', 
+                        value: `Prix au-dessus du nuage` 
+                    });
+                }
+            }
+
+            // Parabolic SAR ACHAT
+            if (activeIndicators.buy && activeIndicators.buy.psar) {
+                const accel = parseFloat(document.getElementById('buy_psar_accel').value);
+                const max = parseFloat(document.getElementById('buy_psar_max').value);
+                
+                const psar = calculateParabolicSAR(priceHistory, accel, max);
+                if (psar && price > psar.sar && psar.trend) {
+                    buySignals.push({ 
+                        type: 'BUY', 
+                        indicator: 'Parabolic SAR', 
+                        value: `Prix au-dessus SAR (Tendance haussière)` 
+                    });
+                }
+            }
+
+            // ============ SIGNAUX DE VENTE ============
+            
+            // RSI VENTE
+            if (activeIndicators.sell && activeIndicators.sell.rsi) {
+                const period = parseInt(document.getElementById('sell_rsi_period').value);
+                const overbought = parseInt(document.getElementById('sell_rsi_overbought').value);
+                
+                const rsi = calculateRSI(priceHistory, period);
+                if (rsi && rsi > overbought) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'RSI', 
+                        value: `${rsi.toFixed(2)} > ${overbought} (Suracheté)` 
+                    });
+                }
+            }
+
+            // MACD VENTE (Croisement baissier)
+            if (activeIndicators.sell && activeIndicators.sell.macd) {
+                const fast = parseInt(document.getElementById('sell_macd_fast').value);
+                const slow = parseInt(document.getElementById('sell_macd_slow').value);
+                
+                const macd = calculateMACD(priceHistory, fast, slow);
+                if (macd && macd.histogram < 0) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'MACD', 
+                        value: `Histogram: ${macd.histogram.toFixed(4)} (Baissier)` 
+                    });
+                }
+            }
+
+            // Bollinger Bands VENTE (Prix sur bande supérieure)
+            if (activeIndicators.sell && activeIndicators.sell.bb) {
+                const period = parseInt(document.getElementById('sell_bb_period').value);
+                const stddev = parseFloat(document.getElementById('sell_bb_stddev').value);
+                
+                const bb = calculateBollingerBands(priceHistory, period, stddev);
+                if (bb && price > bb.upper) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'BB', 
+                        value: `Prix ${price.toFixed(2)} > Bande sup. ${bb.upper.toFixed(2)}` 
+                    });
+                }
+            }
+
+            // EMA Crossover VENTE
+            if (activeIndicators.sell && activeIndicators.sell.ema) {
+                const shortPeriod = parseInt(document.getElementById('sell_ema_short').value);
+                const longPeriod = parseInt(document.getElementById('sell_ema_long').value);
+                
+                const emaShort = calculateEMA(priceHistory, shortPeriod);
+                const emaLong = calculateEMA(priceHistory, longPeriod);
+                
+                if (emaShort && emaLong && emaShort < emaLong) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'EMA', 
+                        value: `EMA${shortPeriod} < EMA${longPeriod} (Croisement baissier)` 
+                    });
+                }
+            }
+
+            // SMA Crossover VENTE
+            if (activeIndicators.sell && activeIndicators.sell.sma) {
+                const shortPeriod = parseInt(document.getElementById('sell_sma_short').value);
+                const longPeriod = parseInt(document.getElementById('sell_sma_long').value);
+                
+                const smaShort = calculateSMA(priceHistory, shortPeriod);
+                const smaLong = calculateSMA(priceHistory, longPeriod);
+                
+                if (smaShort && smaLong && smaShort < smaLong) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'SMA', 
+                        value: `SMA${shortPeriod} < SMA${longPeriod} (Croisement baissier)` 
+                    });
+                }
+            }
+
+            // Stochastic VENTE
+            if (activeIndicators.sell && activeIndicators.sell.stoch) {
+                const kPeriod = parseInt(document.getElementById('sell_stoch_k').value);
+                const overbought = parseInt(document.getElementById('sell_stoch_high').value);
+                
+                const stoch = calculateStochastic(priceHistory, kPeriod);
+                if (stoch && stoch.k > overbought) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'Stochastic', 
+                        value: `%K ${stoch.k.toFixed(2)} > ${overbought} (Suracheté)` 
+                    });
+                }
+            }
+
+            // ATR VENTE (Volatilité faible = moment de vendre)
+            if (activeIndicators.sell && activeIndicators.sell.atr) {
+                const period = parseInt(document.getElementById('sell_atr_period').value);
+                const threshold = parseFloat(document.getElementById('sell_atr_threshold').value);
+                
+                const atr = calculateATR(priceHistory, period);
+                const avgPrice = calculateSMA(priceHistory, period);
+                
+                if (atr && avgPrice && (atr / avgPrice) < (threshold / 100)) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'ATR', 
+                        value: `Volatilité faible: ${((atr/avgPrice)*100).toFixed(2)}%` 
+                    });
+                }
+            }
+
+            // ADX VENTE (Tendance forte baissière)
+            if (activeIndicators.sell && activeIndicators.sell.adx) {
+                const period = parseInt(document.getElementById('sell_adx_period').value);
+                const threshold = parseInt(document.getElementById('sell_adx_threshold').value);
+                
+                const adx = calculateADX(priceHistory, period);
+                const recentTrend = priceHistory[priceHistory.length - 1] < priceHistory[priceHistory.length - period];
+                
+                if (adx && adx > threshold && recentTrend) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'ADX', 
+                        value: `Tendance forte baissière: ${adx.toFixed(2)} > ${threshold}` 
+                    });
+                }
+            }
+
+            // CCI VENTE
+            if (activeIndicators.sell && activeIndicators.sell.cci) {
+                const period = parseInt(document.getElementById('sell_cci_period').value);
+                const overbought = parseInt(document.getElementById('sell_cci_overbought').value);
+                
+                const cci = calculateCCI(priceHistory, period);
+                if (cci && cci > overbought) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'CCI', 
+                        value: `${cci.toFixed(2)} > ${overbought} (Suracheté)` 
+                    });
+                }
+            }
+
+            // Williams %R VENTE
+            if (activeIndicators.sell && activeIndicators.sell.willr) {
+                const period = parseInt(document.getElementById('sell_willr_period').value);
+                const overbought = parseInt(document.getElementById('sell_willr_overbought').value);
+                
+                const willr = calculateWilliamsR(priceHistory, period);
+                if (willr && willr > overbought) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'Williams %R', 
+                        value: `${willr.toFixed(2)} > ${overbought} (Suracheté)` 
+                    });
+                }
+            }
+
+            // OBV VENTE
+            if (activeIndicators.sell && activeIndicators.sell.obv) {
+                const period = parseInt(document.getElementById('sell_obv_period').value);
+                
+                const obv = calculateOBV(priceHistory, period);
+                const obvPrev = calculateOBV(priceHistory.slice(0, -5), period);
+                
+                if (obv && obvPrev && obv < obvPrev) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'OBV', 
+                        value: `Volume en baisse` 
+                    });
+                }
+            }
+
+            // Ichimoku VENTE
+            if (activeIndicators.sell && activeIndicators.sell.ichimoku) {
+                const tenkan = parseInt(document.getElementById('sell_ich_tenkan').value);
+                const kijun = parseInt(document.getElementById('sell_ich_kijun').value);
+                const senkou = parseInt(document.getElementById('sell_ich_senkou').value);
+                
+                const ichimoku = calculateIchimoku(priceHistory, tenkan, kijun, senkou);
+                if (ichimoku && price < ichimoku.cloud) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'Ichimoku', 
+                        value: `Prix en-dessous du nuage` 
+                    });
+                }
+            }
+
+            // Parabolic SAR VENTE
+            if (activeIndicators.sell && activeIndicators.sell.psar) {
+                const accel = parseFloat(document.getElementById('sell_psar_accel').value);
+                const max = parseFloat(document.getElementById('sell_psar_max').value);
+                
+                const psar = calculateParabolicSAR(priceHistory, accel, max);
+                if (psar && price < psar.sar && !psar.trend) {
+                    sellSignals.push({ 
+                        type: 'SELL', 
+                        indicator: 'Parabolic SAR', 
+                        value: `Prix en-dessous SAR (Tendance baissière)` 
+                    });
                 }
             }
 
             // Déterminer l'action finale
-            const buySignals = signals.filter(s => s.type === 'BUY').length;
-            const sellSignals = signals.filter(s => s.type === 'SELL').length;
-
             let action = 'HOLD';
-            if (buySignals > sellSignals && buySignals >= 2) action = 'BUY';
-            if (sellSignals > buySignals && sellSignals >= 2) action = 'SELL';
+            let signals = [];
 
-            return { action, signals };
+            // Priorité aux signaux d'achat si au moins 2 indicateurs d'achat sont positifs
+            if (buySignals.length >= 2) {
+                action = 'BUY';
+                signals = buySignals;
+            }
+            // Sinon, signaux de vente si au moins 2 indicateurs de vente sont positifs
+            else if (sellSignals.length >= 2) {
+                action = 'SELL';
+                signals = sellSignals;
+            }
+
+            return { action, signals, buySignals, sellSignals };
         }
 
         // Configuration des API de prix
@@ -1588,12 +2260,23 @@
                 chart.update('none');
 
                 // Analyser les signaux si le bot est actif
-                if (botRunning && Object.keys(activeIndicators).length > 0) {
-                    const analysis = analyzeSignals(price);
+                if (botRunning) {
+                    const hasBuyIndicators = activeIndicators.buy && Object.keys(activeIndicators.buy).length > 0;
+                    const hasSellIndicators = activeIndicators.sell && Object.keys(activeIndicators.sell).length > 0;
                     
-                    if (analysis.action !== 'HOLD') {
-                        addLog(`Signal ${analysis.action}: ${analysis.signals.length} indicateurs`, 'info');
-                        await executeTrade(analysis.action, price, analysis.signals);
+                    if (hasBuyIndicators || hasSellIndicators) {
+                        const analysis = analyzeSignals(price);
+                        
+                        if (analysis.action !== 'HOLD') {
+                            const signalCount = analysis.action === 'BUY' ? analysis.buySignals.length : analysis.sellSignals.length;
+                            addLog(`Signal ${analysis.action}: ${signalCount} indicateurs`, 'info');
+                            await executeTrade(analysis.action, price, analysis.signals);
+                        }
+                    } else {
+                        // Avertir l'utilisateur s'il n'y a pas d'indicateurs sélectionnés
+                        if (Math.random() < 0.01) { // 1% de chance d'afficher le message pour ne pas spammer
+                            addLog('⚠️ Aucun indicateur sélectionné. Sélectionnez des indicateurs d\'achat ou de vente.', 'info');
+                        }
                     }
                 }
 
@@ -1690,8 +2373,11 @@
                 return;
             }
 
-            if (Object.keys(activeIndicators).length === 0) {
-                alert('Veuillez sélectionner au moins un indicateur technique!');
+            const hasBuyIndicators = activeIndicators.buy && Object.keys(activeIndicators.buy).length > 0;
+            const hasSellIndicators = activeIndicators.sell && Object.keys(activeIndicators.sell).length > 0;
+
+            if (!hasBuyIndicators && !hasSellIndicators) {
+                alert('Veuillez sélectionner au moins un indicateur d\'ACHAT ou de VENTE!\n\n🟢 Indicateurs d\'ACHAT: Génèrent des signaux pour acheter\n🔴 Indicateurs de VENTE: Génèrent des signaux pour vendre');
                 return;
             }
 
@@ -1699,7 +2385,12 @@
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
 
+            const buyCount = hasBuyIndicators ? Object.keys(activeIndicators.buy).length : 0;
+            const sellCount = hasSellIndicators ? Object.keys(activeIndicators.sell).length : 0;
+
             addLog('🤖 Bot démarré!', 'success');
+            addLog(`📊 ${buyCount} indicateur(s) d'ACHAT activé(s)`, 'success');
+            addLog(`📊 ${sellCount} indicateur(s) de VENTE activé(s)`, 'success');
 
             const interval = parseInt(document.getElementById('interval').value);
             priceInterval = setInterval(updatePrice, interval);
