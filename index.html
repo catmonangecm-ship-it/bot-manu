@@ -382,9 +382,20 @@
             <div class="wallet-info">
                 <div class="wallet-address" id="walletAddress">Non connecté</div>
                 <div class="balance" id="balance">0 ETH</div>
+                <div id="networkIndicator" style="background: rgba(79, 172, 254, 0.2); padding: 10px 20px; border-radius: 25px; font-weight: bold; display: none;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #44ff44; margin-right: 8px; animation: pulse 2s infinite;"></span>
+                    <span id="networkName">Ethereum</span>
+                </div>
                 <button id="connectBtn" onclick="connectWallet()">Connecter MetaMask</button>
             </div>
         </header>
+
+        <style>
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+        </style>
 
         <div class="grid">
             <!-- Configuration Panel -->
@@ -392,13 +403,54 @@
                 <h2>⚙️ Configuration</h2>
                 
                 <div class="form-group">
-                    <label>Réseau</label>
-                    <select id="network">
-                        <option value="1">Ethereum Mainnet</option>
-                        <option value="56">Binance Smart Chain</option>
-                        <option value="137">Polygon</option>
-                        <option value="42161">Arbitrum</option>
+                    <label>Sélectionner une Crypto</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="cryptoSelect" onchange="changeCrypto()" style="flex: 1;">
+                            <option value="bitcoin">Bitcoin (BTC)</option>
+                            <option value="ethereum" selected>Ethereum (ETH)</option>
+                            <option value="binancecoin">Binance Coin (BNB)</option>
+                            <option value="cardano">Cardano (ADA)</option>
+                            <option value="solana">Solana (SOL)</option>
+                            <option value="ripple">Ripple (XRP)</option>
+                            <option value="polkadot">Polkadot (DOT)</option>
+                            <option value="dogecoin">Dogecoin (DOGE)</option>
+                            <option value="avalanche-2">Avalanche (AVAX)</option>
+                            <option value="matic-network">Polygon (MATIC)</option>
+                            <option value="chainlink">Chainlink (LINK)</option>
+                            <option value="uniswap">Uniswap (UNI)</option>
+                            <option value="litecoin">Litecoin (LTC)</option>
+                            <option value="shiba-inu">Shiba Inu (SHIB)</option>
+                            <option value="tron">Tron (TRX)</option>
+                        </select>
+                        <button onclick="refreshPrice()" style="width: auto; padding: 12px 20px;">🔄</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Monnaie de référence</label>
+                    <select id="vsCurrency" onchange="changeCurrency()">
+                        <option value="usd" selected>USD ($)</option>
+                        <option value="eur">EUR (€)</option>
+                        <option value="gbp">GBP (£)</option>
+                        <option value="jpy">JPY (¥)</option>
+                        <option value="btc">BTC</option>
+                        <option value="eth">ETH</option>
                     </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Réseau Blockchain</label>
+                    <select id="network" onchange="changeNetwork()">
+                        <option value="1" selected>Ethereum Mainnet</option>
+                        <option value="56">Binance Smart Chain (BSC)</option>
+                        <option value="137">Polygon (MATIC)</option>
+                        <option value="42161">Arbitrum One</option>
+                        <option value="10">Optimism</option>
+                        <option value="43114">Avalanche C-Chain</option>
+                    </select>
+                    <small style="color: #4facfe; font-size: 0.85em; margin-top: 5px; display: block;">
+                        ⚠️ Le changement de réseau mettra à jour votre solde et les frais de transaction
+                    </small>
                 </div>
 
                 <div class="token-selector">
@@ -448,6 +500,13 @@
                     <div class="form-group">
                         <label>Slippage Maximum (%)</label>
                         <input type="number" id="slippage" value="1" step="0.1" min="0">
+                    </div>
+                    
+                    <div id="networkFees" style="margin-top: 15px; padding: 10px; background: rgba(0, 242, 254, 0.1); border-radius: 8px; font-size: 0.9em;">
+                        <strong style="color: #00f2fe;">💰 Frais estimés:</strong>
+                        <div id="feesInfo" style="margin-top: 5px; color: #4facfe;">
+                            Connectez votre wallet pour voir les frais
+                        </div>
                     </div>
                 </div>
 
@@ -659,6 +718,71 @@
         let chart;
         let activeIndicators = {};
         let lastPrice = 0;
+        let currentNetwork = {
+            chainId: 1,
+            name: 'Ethereum Mainnet',
+            nativeCurrency: 'ETH',
+            rpcUrl: 'https://eth.llamarpc.com',
+            explorerUrl: 'https://etherscan.io'
+        };
+
+        // Configuration des réseaux
+        const networks = {
+            1: {
+                chainId: 1,
+                name: 'Ethereum Mainnet',
+                nativeCurrency: 'ETH',
+                rpcUrl: 'https://eth.llamarpc.com',
+                explorerUrl: 'https://etherscan.io',
+                symbol: 'ETH',
+                decimals: 18
+            },
+            56: {
+                chainId: 56,
+                name: 'Binance Smart Chain',
+                nativeCurrency: 'BNB',
+                rpcUrl: 'https://bsc-dataseed1.binance.org',
+                explorerUrl: 'https://bscscan.com',
+                symbol: 'BNB',
+                decimals: 18
+            },
+            137: {
+                chainId: 137,
+                name: 'Polygon',
+                nativeCurrency: 'MATIC',
+                rpcUrl: 'https://polygon-rpc.com',
+                explorerUrl: 'https://polygonscan.com',
+                symbol: 'MATIC',
+                decimals: 18
+            },
+            42161: {
+                chainId: 42161,
+                name: 'Arbitrum One',
+                nativeCurrency: 'ETH',
+                rpcUrl: 'https://arb1.arbitrum.io/rpc',
+                explorerUrl: 'https://arbiscan.io',
+                symbol: 'ETH',
+                decimals: 18
+            },
+            10: {
+                chainId: 10,
+                name: 'Optimism',
+                nativeCurrency: 'ETH',
+                rpcUrl: 'https://mainnet.optimism.io',
+                explorerUrl: 'https://optimistic.etherscan.io',
+                symbol: 'ETH',
+                decimals: 18
+            },
+            43114: {
+                chainId: 43114,
+                name: 'Avalanche C-Chain',
+                nativeCurrency: 'AVAX',
+                rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
+                explorerUrl: 'https://snowtrace.io',
+                symbol: 'AVAX',
+                decimals: 18
+            }
+        };
 
         // Initialisation du graphique
         function initChart() {
@@ -701,6 +825,133 @@
             });
         }
 
+        // Changer de réseau
+        async function changeNetwork() {
+            const networkSelect = document.getElementById('network');
+            const chainId = parseInt(networkSelect.value);
+            const networkConfig = networks[chainId];
+
+            if (!networkConfig) {
+                addLog('Réseau non supporté', 'error');
+                return;
+            }
+
+            currentNetwork = networkConfig;
+            
+            if (!provider) {
+                addLog(`Réseau sélectionné: ${networkConfig.name}`, 'info');
+                return;
+            }
+
+            try {
+                addLog(`Changement vers ${networkConfig.name}...`, 'info');
+                
+                // Demander à MetaMask de changer de réseau
+                try {
+                    await ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0x' + chainId.toString(16) }],
+                    });
+                } catch (switchError) {
+                    // Si le réseau n'existe pas dans MetaMask, on l'ajoute
+                    if (switchError.code === 4902) {
+                        try {
+                            await ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x' + chainId.toString(16),
+                                    chainName: networkConfig.name,
+                                    nativeCurrency: {
+                                        name: networkConfig.nativeCurrency,
+                                        symbol: networkConfig.symbol,
+                                        decimals: networkConfig.decimals
+                                    },
+                                    rpcUrls: [networkConfig.rpcUrl],
+                                    blockExplorerUrls: [networkConfig.explorerUrl]
+                                }],
+                            });
+                        } catch (addError) {
+                            addLog('Erreur lors de l\'ajout du réseau: ' + addError.message, 'error');
+                            return;
+                        }
+                    } else {
+                        addLog('Erreur lors du changement de réseau: ' + switchError.message, 'error');
+                        return;
+                    }
+                }
+
+                // Mettre à jour le provider
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+
+                // Mettre à jour l'affichage
+                await updateBalance();
+                updateNetworkDisplay();
+                await updateFeesDisplay();
+                
+                addLog(`✓ Connecté à ${networkConfig.name}`, 'success');
+
+            } catch (error) {
+                addLog('Erreur: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        // Mettre à jour l'affichage du réseau
+        function updateNetworkDisplay() {
+            // Afficher l'indicateur de réseau
+            const networkIndicator = document.getElementById('networkIndicator');
+            const networkName = document.getElementById('networkName');
+            
+            networkIndicator.style.display = 'block';
+            networkName.textContent = currentNetwork.name;
+            
+            // Couleurs par réseau
+            const networkColors = {
+                1: '#627eea',      // Ethereum
+                56: '#f3ba2f',     // BSC
+                137: '#8247e5',    // Polygon
+                42161: '#28a0f0',  // Arbitrum
+                10: '#ff0420',     // Optimism
+                43114: '#e84142'   // Avalanche
+            };
+            
+            const color = networkColors[currentNetwork.chainId] || '#4facfe';
+            networkIndicator.style.background = `rgba(${hexToRgb(color)}, 0.2)`;
+            networkIndicator.style.borderLeft = `4px solid ${color}`;
+        }
+
+        // Changer de crypto
+        async function changeCrypto() {
+            const select = document.getElementById('cryptoSelect');
+            currentCryptoId = select.value;
+            priceHistory = []; // Réinitialiser l'historique
+            chart.data.labels = [];
+            chart.data.datasets[0].data = [];
+            chart.update();
+            addLog(`Changement de crypto: ${select.options[select.selectedIndex].text}`, 'info');
+            await updatePrice();
+        }
+
+        // Changer de monnaie
+        async function changeCurrency() {
+            const select = document.getElementById('vsCurrency');
+            currentVsCurrency = select.value;
+            priceHistory = [];
+            chart.data.labels = [];
+            chart.data.datasets[0].data = [];
+            chart.update();
+            addLog(`Changement de monnaie: ${select.value.toUpperCase()}`, 'info');
+            await updatePrice();
+        }
+
+        // Rafraîchir le prix manuellement
+        async function refreshPrice() {
+            addLog('Actualisation du prix...', 'info');
+            await updatePrice();
+            addLog('Prix actualisé avec succès!', 'success');
+        }
+
         // Connexion au wallet MetaMask
         async function connectWallet() {
             try {
@@ -729,6 +980,9 @@
                 document.getElementById('connectBtn').disabled = true;
 
                 addLog('Wallet connecté avec succès!', 'success');
+                
+                // Mettre à jour les frais
+                await updateFeesDisplay();
 
                 // Écouter les changements de compte
                 ethereum.on('accountsChanged', (accounts) => {
@@ -737,13 +991,70 @@
                         location.reload();
                     } else {
                         userAddress = accounts[0];
+                        document.getElementById('walletAddress').textContent = 
+                            userAddress.substring(0, 6) + '...' + userAddress.substring(38);
                         updateBalance();
+                        addLog('Compte changé', 'info');
                     }
                 });
+
+                // Écouter les changements de réseau
+                ethereum.on('chainChanged', (chainId) => {
+                    addLog('Réseau changé, rechargement...', 'info');
+                    location.reload();
+                });
+
+                // Détecter le réseau actuel
+                const network = await provider.getNetwork();
+                const chainId = network.chainId;
+                
+                if (networks[chainId]) {
+                    currentNetwork = networks[chainId];
+                    document.getElementById('network').value = chainId;
+                    updateNetworkDisplay();
+                    addLog(`Réseau détecté: ${currentNetwork.name}`, 'info');
+                } else {
+                    addLog(`Réseau non supporté (Chain ID: ${chainId}). Veuillez changer de réseau.`, 'error');
+                }
 
             } catch (error) {
                 addLog('Erreur de connexion: ' + error.message, 'error');
                 console.error(error);
+            }
+        }
+
+        // Mettre à jour l'affichage des frais
+        async function updateFeesDisplay() {
+            if (!provider) {
+                document.getElementById('feesInfo').innerHTML = 'Connectez votre wallet pour voir les frais';
+                return;
+            }
+
+            try {
+                const gasPrice = await provider.getGasPrice();
+                const gasPriceGwei = ethers.utils.formatUnits(gasPrice, 'gwei');
+                
+                // Estimation des frais pour un swap simple (environ 150000 gas)
+                const estimatedGas = 150000;
+                const estimatedFee = gasPrice.mul(estimatedGas);
+                const estimatedFeeEth = ethers.utils.formatEther(estimatedFee);
+                
+                // Informations selon le réseau
+                const feeDescriptions = {
+                    1: `~${parseFloat(gasPriceGwei).toFixed(2)} Gwei | Frais swap: ~${parseFloat(estimatedFeeEth).toFixed(4)} ETH`,
+                    56: `~${parseFloat(gasPriceGwei).toFixed(2)} Gwei | Frais swap: ~${parseFloat(estimatedFeeEth).toFixed(4)} BNB`,
+                    137: `~${parseFloat(gasPriceGwei).toFixed(2)} Gwei | Frais swap: ~${parseFloat(estimatedFeeEth).toFixed(4)} MATIC`,
+                    42161: `~${parseFloat(gasPriceGwei).toFixed(2)} Gwei | Frais swap: ~${parseFloat(estimatedFeeEth).toFixed(6)} ETH`,
+                    10: `~${parseFloat(gasPriceGwei).toFixed(2)} Gwei | Frais swap: ~${parseFloat(estimatedFeeEth).toFixed(6)} ETH`,
+                    43114: `~${parseFloat(gasPriceGwei).toFixed(2)} Gwei | Frais swap: ~${parseFloat(estimatedFeeEth).toFixed(4)} AVAX`
+                };
+                
+                document.getElementById('feesInfo').innerHTML = feeDescriptions[currentNetwork.chainId] || 
+                    `Gas: ${parseFloat(gasPriceGwei).toFixed(2)} Gwei`;
+                    
+            } catch (error) {
+                console.error('Erreur estimation des frais:', error);
+                document.getElementById('feesInfo').innerHTML = 'Impossible d\'estimer les frais actuellement';
             }
         }
 
@@ -752,11 +1063,29 @@
             try {
                 const balance = await provider.getBalance(userAddress);
                 const ethBalance = ethers.utils.formatEther(balance);
-                document.getElementById('balance').textContent = 
-                    parseFloat(ethBalance).toFixed(4) + ' ETH';
+                const balanceEl = document.getElementById('balance');
+                balanceEl.textContent = parseFloat(ethBalance).toFixed(4) + ' ' + currentNetwork.symbol;
+                
+                // Changer la couleur selon le réseau
+                const networkColors = {
+                    'ETH': '#627eea',
+                    'BNB': '#f3ba2f',
+                    'MATIC': '#8247e5',
+                    'AVAX': '#e84142'
+                };
+                balanceEl.style.background = `rgba(${networkColors[currentNetwork.symbol] ? hexToRgb(networkColors[currentNetwork.symbol]) : '79, 172, 254'}, 0.2)`;
+                
             } catch (error) {
                 console.error('Erreur lors de la récupération du solde:', error);
             }
+        }
+
+        // Convertir hex en RGB
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? 
+                `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : 
+                '79, 172, 254';
         }
 
         // Toggle indicateur
@@ -932,19 +1261,65 @@
             return { action, signals };
         }
 
-        // Récupérer le prix (simulation avec variation aléatoire)
+        // Configuration des API de prix
+        let currentCryptoId = 'ethereum'; // ID CoinGecko par défaut
+        let currentVsCurrency = 'usd';
+        
+        // Récupérer le prix réel via CoinGecko API
         async function fetchPrice() {
-            // Simulation de prix pour la démo
-            // Dans une vraie application, utilisez une API de prix ou un oracle
-            const basePrice = 1800; // Prix de base ETH/USDT
-            const variation = (Math.random() - 0.5) * 20; // Variation de ±10
-            return basePrice + variation + (Math.sin(Date.now() / 10000) * 50);
+            try {
+                const response = await fetch(
+                    `https://api.coingecko.com/api/v3/simple/price?ids=${currentCryptoId}&vs_currencies=${currentVsCurrency}&include_24hr_change=true&include_last_updated_at=true`
+                );
+                
+                if (!response.ok) {
+                    throw new Error('Erreur API: ' + response.status);
+                }
+                
+                const data = await response.json();
+                
+                if (!data[currentCryptoId]) {
+                    throw new Error('Crypto non trouvée');
+                }
+                
+                const priceData = data[currentCryptoId];
+                const price = priceData[currentVsCurrency];
+                const change24h = priceData[`${currentVsCurrency}_24h_change`] || 0;
+                
+                return { 
+                    price: price, 
+                    change24h: change24h,
+                    timestamp: priceData.last_updated_at 
+                };
+                
+            } catch (error) {
+                addLog('Erreur récupération prix: ' + error.message, 'error');
+                // En cas d'erreur, retourner le dernier prix connu
+                if (lastPrice > 0) {
+                    return { price: lastPrice, change24h: 0, timestamp: Date.now() / 1000 };
+                }
+                throw error;
+            }
+        }
+        
+        // Obtenir la liste des cryptos disponibles
+        async function searchCrypto(query) {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(query));
+                const data = await response.json();
+                return data.coins.slice(0, 10); // Top 10 résultats
+            } catch (error) {
+                console.error('Erreur recherche crypto:', error);
+                return [];
+            }
         }
 
         // Mettre à jour le prix
         async function updatePrice() {
             try {
-                const price = await fetchPrice();
+                const priceData = await fetchPrice();
+                const price = priceData.price;
+                
                 priceHistory.push(price);
                 
                 // Garder seulement les 200 derniers prix
@@ -952,16 +1327,22 @@
                     priceHistory.shift();
                 }
 
-                // Mettre à jour l'affichage
-                document.getElementById('currentPrice').textContent = '$' + price.toFixed(2);
-                
-                // Calculer le changement
-                if (lastPrice > 0) {
-                    const change = ((price - lastPrice) / lastPrice) * 100;
-                    const changeEl = document.getElementById('priceChange');
-                    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-                    changeEl.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
+                // Mettre à jour l'affichage du prix
+                const priceEl = document.getElementById('currentPrice');
+                if (price >= 1) {
+                    priceEl.textContent = '$' + price.toFixed(2);
+                } else if (price >= 0.01) {
+                    priceEl.textContent = '$' + price.toFixed(4);
+                } else {
+                    priceEl.textContent = '$' + price.toFixed(8);
                 }
+                
+                // Afficher le changement 24h
+                const changeEl = document.getElementById('priceChange');
+                const change24h = priceData.change24h;
+                changeEl.textContent = (change24h >= 0 ? '+' : '') + change24h.toFixed(2) + '% (24h)';
+                changeEl.className = 'price-change ' + (change24h >= 0 ? 'positive' : 'negative');
+                
                 lastPrice = price;
 
                 // Mettre à jour le graphique
@@ -1140,6 +1521,17 @@
             initChart();
             addLog('Application initialisée', 'success');
             addLog('Connectez votre wallet MetaMask pour commencer', 'info');
+            addLog('Chargement du prix en temps réel...', 'info');
+            
+            // Charger le prix initial immédiatement
+            updatePrice();
+            
+            // Actualiser le prix toutes les 30 secondes même quand le bot n'est pas actif
+            setInterval(() => {
+                if (!botRunning) {
+                    updatePrice();
+                }
+            }, 30000);
         });
 
         // Empêcher le bot de s'arrêter en veille (Page Visibility API)
