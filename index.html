@@ -175,14 +175,411 @@
                         <canvas id="priceChart"></canvas>
                     </div>
                 </div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Trading Pro - Interface Moderne</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .container { max-width: 1920px; margin: 0 auto; padding: 20px; }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .wallet-info {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .wallet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .wallet-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #ee0979, #ff6a00); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .main-grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        .panel {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .panel h2 { margin-bottom: 20px; font-size: 1.5em; display: flex; align-items: center; gap: 10px; }
+        
+        .indicator-list { max-height: 600px; overflow-y: auto; }
+        .indicator-item {
+            background: rgba(255,255,255,0.03);
+            border: 2px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .indicator-item:hover { border-color: rgba(102, 126, 234, 0.5); transform: translateX(5px); }
+        .indicator-item.active {
+            border-color: #11998e;
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.2), rgba(56, 239, 125, 0.2));
+            box-shadow: 0 5px 20px rgba(17, 153, 142, 0.3);
+        }
+        .indicator-item h3 { font-size: 1.1em; margin-bottom: 5px; }
+        .indicator-item p { font-size: 0.85em; opacity: 0.7; }
+        .indicator-value {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #11998e;
+        }
+        .indicator-signal {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .signal-buy { background: rgba(56, 239, 125, 0.3); color: #38ef7d; }
+        .signal-sell { background: rgba(239, 9, 121, 0.3); color: #ee0979; }
+        .signal-neutral { background: rgba(255, 255, 255, 0.1); color: #999; }
+        
+        .controls-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 0.9em; opacity: 0.8; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255,255,255,0.08);
+        }
+        
+        .chart-container { position: relative; height: 400px; margin: 20px 0; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .stat-card .label { font-size: 0.85em; opacity: 0.8; margin-bottom: 10px; }
+        .stat-card .value { font-size: 2em; font-weight: 700; }
+        
+        .trade-item {
+            background: rgba(255,255,255,0.03);
+            border-left: 4px solid;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .trade-item.buy { border-left-color: #38ef7d; }
+        .trade-item.sell { border-left-color: #ee0979; }
+        .trade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .trade-type { font-size: 1.2em; font-weight: 700; }
+        .trade-profit { font-size: 1.3em; font-weight: 700; }
+        .profit-positive { color: #38ef7d; }
+        .profit-negative { color: #ee0979; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: #1a1f3a;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .modal-header { margin-bottom: 25px; }
+        .modal-header h2 { font-size: 1.8em; }
+        .close-modal {
+            float: right;
+            font-size: 2em;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+        .close-modal:hover { opacity: 1; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(102, 126, 234, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(102, 126, 234, 0.8); }
+        
+        @media (max-width: 1200px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .controls-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h1>🤖 Bot Trading Pro</h1>
+                    <p>Trading Automatisé Intelligent avec Indicateurs Techniques en Temps Réel</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" id="btnWallet">🔑 Connecter Wallet</button>
+                    <button class="btn btn-primary" id="btnBinance">🟡 Binance API</button>
+                </div>
+            </div>
+        </div>
 
+        <!-- Wallet Info -->
+        <div class="wallet-info" id="walletInfo">
+            <div class="wallet-grid">
+                <div class="wallet-card">
+                    <div class="label">Adresse Wallet</div>
+                    <div class="value" id="walletAddr" style="font-family: monospace; font-size: 0.9em;">-</div>
+                </div>
+                <div class="wallet-card">
+                    <div class="label">Balance BNB</div>
+                    <div class="value" id="balanceBnb" style="color: #f3ba2f;">0.0000</div>
+                </div>
+                <div class="wallet-card">
+                    <div class="label">Balance USDT</div>
+                    <div class="value" id="balanceUsdt" style="color: #26a17b;">0.00</div>
+                </div>
+                <div class="wallet-card">
+                    <div class="label">Profit Total</div>
+                    <div class="value profit-positive" id="totalProfit">$0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left: Indicators -->
+            <div class="panel">
+                <h2>📊 Indicateurs Techniques</h2>
+                <p style="opacity: 0.7; margin-bottom: 20px; font-size: 0.9em;">
+                    Cliquez pour activer/désactiver • Les valeurs et signaux s'affichent en temps réel
+                </p>
+                <div style="background: rgba(17, 153, 142, 0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(17, 153, 142, 0.3);">
+                    <div style="font-weight: 600; margin-bottom: 5px;">✅ Sélectionnés: <span id="selectedCount" style="color: #38ef7d;">0</span></div>
+                    <div style="font-size: 0.85em; opacity: 0.8;">Le bot trade si ≥60% des indicateurs sont d'accord</div>
+                </div>
+                <div class="indicator-list" id="indicatorList">
+                    <!-- Indicators populated by JS -->
+                </div>
+            </div>
+
+            <!-- Right: Trading -->
+            <div>
+                <!-- Controls -->
+                <div class="panel">
+                    <h2>⚙️ Configuration Trading</h2>
+                    <div class="controls-grid">
+                        <div class="form-group">
+                            <label>💱 Paire de Trading</label>
+                            <select id="selectPair">
+                                <option value="BTCUSDT">BTC/USDT</option>
+                                <option value="ETHUSDT">ETH/USDT</option>
+                                <option value="BNBUSDT">BNB/USDT</option>
+                                <option value="ADAUSDT">ADA/USDT</option>
+                                <option value="SOLUSDT">SOL/USDT</option>
+                                <option value="XRPUSDT">XRP/USDT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>🎮 Mode Trading</label>
+                            <select id="selectMode">
+                                <option value="simulation">Simulation</option>
+                                <option value="binance">Binance Spot</option>
+                                <option value="pancake">PancakeSwap</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>💰 Capital (USDT)</label>
+                            <input type="number" id="inputCapital" value="100" min="10">
+                        </div>
+                        <div class="form-group">
+                            <label>📊 % par Trade</label>
+                            <input type="number" id="inputPercent" value="10" min="1" max="100">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button class="btn btn-success" id="btnStart" style="flex: 1;">▶️ DÉMARRER LE BOT</button>
+                        <button class="btn btn-danger" id="btnStop" style="flex: 1;" disabled>⏹️ ARRÊTER</button>
+                        <label style="display: flex; align-items: center; gap: 10px; padding: 0 20px; background: rgba(255,255,255,0.05); border-radius: 10px; cursor: pointer;">
+                            <input type="checkbox" id="checkWake" style="width: 20px; height: 20px;">
+                            <span>🔋 Mode 24/7</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid" style="margin-top: 20px;">
+                    <div class="stat-card">
+                        <div class="label">Prix Actuel</div>
+                        <div class="value" id="currentPrice">$0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Position</div>
+                        <div class="value" id="currentPosition">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Total Trades</div>
+                        <div class="value" id="totalTrades">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Taux Réussite</div>
+                        <div class="value" id="successRate">0%</div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="panel">
+                    <h2>📈 Graphique Prix en Temps Réel</h2>
+                    <div class="chart-container">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Trades -->
+                <div class="panel">
+                    <h2>📜 Historique des Trades</h2>
+                    <div id="tradesList" style="max-height: 400px; overflow-y: auto;">
+                        <div style="text-align: center; padding: 40px; opacity: 0.5;">
+                            <div style="font-size: 3em; margin-bottom: 10px;">🤖</div>
+                            <div>Aucun trade pour le moment</div>
+                            <div style="font-size: 0.85em; margin-top: 5px;">Sélectionnez des indicateurs et démarrez le bot</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Modal -->
+    <div class="modal" id="modalWallet">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-modal" id="closeWallet">&times;</span>
+                <h2>🔑 Connexion Wallet</h2>
+            </div>
+            <div style="background: rgba(255, 193, 7, 0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                <p style="font-size: 0.9em;">⚠️ <strong>Ne partagez JAMAIS votre clé privée !</strong></p>
+                <p style="font-size: 0.85em; margin-top: 5px; opacity: 0.8;">Votre clé privée donne un accès total à vos fonds.</p>
+            </div>
+            <div class="form-group">
+                <label>Clé Privée (avec ou sans 0x)</label>
+                <input type="password" id="inputPrivateKey" placeholder="0x..." style="font-family: monospace;">
+            </div>
+            <button class="btn btn-primary" id="btnConnectWallet" style="width: 100%; margin-top: 20px;">Se Connecter</button>
+        </div>
+    </div>
+
+    <!-- Binance Modal -->
+    <div class="modal" id="modalBinance">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-modal" id="closeBinance">&times;</span>
+                <h2>🟡 Binance API</h2>
+            </div>
+            <div style="background: rgba(243, 186, 47, 0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(243, 186, 47, 0.3);">
+                <p style="font-size: 0.9em; font-weight: 600; margin-bottom: 8px;">💡 Comment obtenir vos clés API :</p>
+                <p style="font-size: 0.85em; opacity: 0.9;">1. Binance.com → Profil → API Management</p>
+                <p style="font-size: 0.85em; opacity: 0.9;">2. Créer une nouvelle API Key</p>
+                <p style="font-size: 0.85em; opacity: 0.9;">3. Activer "Enable Spot & Margin Trading"</p>
+            </div>
+            <div class="form-group">
+                <label>API Key</label>
+                <input type="text" id="inputApiKey" placeholder="Votre API Key" style="font-family: monospace;">
+            </div>
+            <div class="form-group">
+                <label>Secret Key</label>
+                <input type="password" id="inputSecretKey" placeholder="Votre Secret Key" style="font-family: monospace;">
+            </div>
+            <button class="btn btn-primary" id="btnConnectBinance" style="width: 100%; margin-top: 20px;">Connecter API</button>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const BSC_RPC = 'https://bsc-dataseed1.binance.org';
+        const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+        const USDT_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';
+        const TOKEN_ADDRESSES = {
+            'BTCUSDT': '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c',
+            'ETHUSDT': '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
+            'BNBUSDT': '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+            'ADAUSDT': '0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47',
+            'SOLUSDT': '0x570A5D26f7765Ecb712C0924E4De545B89fD43dF',
+            'XRPUSDT': '0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE'
+        };
+
+        const INDICATORS = [
+            { id: 'rsi', name: 'RSI', desc: 'Relative Strength Index - Détecte les zones de surachat/survente', thresholds: { buy: 30, sell: 70 } },
+            { id: 'macd', name: 'MACD', desc: 'Moving Average Convergence Divergence - Croisements de moyennes', thresholds: { buy: 0, sell: 0 } },
+            { id: 'ema20', name: 'EMA 20', desc: 'Exponential Moving Average 20 périodes - Tendance court terme', thresholds: {} },
+            { id: 'sma50', name: 'SMA 50', desc: 'Simple Moving Average 50 périodes - Tendance moyen terme', thresholds: {} },
+            { id: 'bollinger', name: 'Bollinger Bands', desc: 'Bandes de Bollinger - Volatilité et supports/résistances', thresholds: {} },
+            { id: 'stochastic', name: 'Stochastic', desc: 'Oscillateur Stochastique - Momentum et retournements', thresholds: { buy: 20, sell: 80 } },
+            { id: 'williams', name: 'Williams %R', desc: 'Williams Percent Range - Zones de sur
                 <!-- Indicator Values -->
                 <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
                     <h2 class="text-2xl font-bold mb-4">📊 Valeurs des Indicateurs</h2>
                     <div id="indicatorValues" class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="text-center py-4 text-gray-400">Sélectionnez des indicateurs</div>
                     </div>
-                </div>
+                </div
 
                 <!-- Trade History -->
                 <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
