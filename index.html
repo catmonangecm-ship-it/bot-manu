@@ -2,7 +2,975 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Trading Pro - Tous Indicateurs</title>
+    <script src="https://cdn.jsdelivr.net/npm/tailwindcss-cdn@3.4.1/tailwindcss.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .indicator-card {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .indicator-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .indicator-card.active {
+            border: 2px solid #10b981 !important;
+            background: rgba(16, 185, 129, 0.1) !important;
+        }
+    </style>
+</head>
+<body class="text-white p-4">
+    <div class="max-w-[1800px] mx-auto">
+        <!-- Header -->
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">🤖 Bot Trading Pro</h1>
+                    <p class="text-gray-300">Trading Automatisé avec Indicateurs Techniques • BSC & Binance</p>
+                </div>
+                <div class="flex gap-3">
+                    <button id="walletBtn" class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg font-semibold hover:shadow-lg transition">
+                        🔑 <span id="walletBtnText">Connecter</span>
+                    </button>
+                    <button id="binanceBtn" class="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg font-semibold hover:shadow-lg transition">
+                        🟡 Binance
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Info -->
+        <div id="walletInfo" class="hidden bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <p class="text-sm text-gray-300 mb-1">Wallet</p>
+                    <p class="text-lg font-mono" id="walletAddress">-</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-300 mb-1">Balance BNB</p>
+                    <p class="text-lg font-bold text-green-400" id="bnbBalance">0.00</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-300 mb-1">Balance USDT</p>
+                    <p class="text-lg font-bold text-blue-400" id="usdtBalance">0.00</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-300 mb-1">Profit Total</p>
+                    <p class="text-lg font-bold" id="totalProfit">$0.00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Modal -->
+        <div id="walletModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-gray-900 rounded-2xl p-6 max-w-md w-full border-2 border-purple-500">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold">🔑 Connexion Wallet</h3>
+                    <button id="closeWalletModal" class="text-gray-400 hover:text-white text-2xl">×</button>
+                </div>
+                <div class="bg-yellow-500/20 border border-yellow-500 rounded-lg p-4 mb-4">
+                    <p class="text-sm">⚠️ Ne partagez jamais votre clé privée avec personne !</p>
+                </div>
+                <input type="password" id="privateKeyInput" placeholder="Clé privée (avec ou sans 0x)" class="w-full bg-gray-800 rounded-lg px-4 py-3 mb-4 border border-gray-700 focus:border-purple-500 focus:outline-none font-mono">
+                <button id="connectWalletBtn" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                    Se Connecter
+                </button>
+            </div>
+        </div>
+
+        <!-- Binance Modal -->
+        <div id="binanceModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-gray-900 rounded-2xl p-6 max-w-md w-full border-2 border-yellow-500">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold">🟡 Binance API</h3>
+                    <button id="closeBinanceModal" class="text-gray-400 hover:text-white text-2xl">×</button>
+                </div>
+                <input type="text" id="binanceApiKey" placeholder="API Key" class="w-full bg-gray-800 rounded-lg px-4 py-3 mb-3 border border-gray-700 focus:border-yellow-500 focus:outline-none font-mono">
+                <input type="password" id="binanceSecretKey" placeholder="Secret Key" class="w-full bg-gray-800 rounded-lg px-4 py-3 mb-4 border border-gray-700 focus:border-yellow-500 focus:outline-none font-mono">
+                <button id="connectBinanceBtn" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                    Connecter API
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Panel: Indicators -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                <h2 class="text-2xl font-bold mb-4">📊 Indicateurs Techniques</h2>
+                <p class="text-sm text-gray-300 mb-4">Sélectionnez les indicateurs à utiliser</p>
+                
+                <div id="indicatorsList" class="space-y-3 max-h-[500px] overflow-y-auto">
+                    <!-- Indicators will be populated here -->
+                </div>
+
+                <div class="mt-6 p-4 bg-blue-500/20 rounded-lg border border-blue-500">
+                    <p class="text-sm font-semibold mb-2">💡 Sélection</p>
+                    <p class="text-xs">Sélectionnés: <span id="selectedCount" class="font-bold">0</span></p>
+                    <p class="text-xs">Le bot exécute si 60% des indicateurs sont d'accord</p>
+                </div>
+            </div>
+
+            <!-- Middle Panel: Chart & Controls -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Trading Controls -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm mb-2">Paire</label>
+                            <select id="pairSelect" class="w-full bg-gray-800 rounded-lg px-4 py-2 border border-gray-700 focus:border-purple-500 focus:outline-none">
+                                <option value="BTCUSDT">BTC/USDT</option>
+                                <option value="ETHUSDT">ETH/USDT</option>
+                                <option value="BNBUSDT">BNB/USDT</option>
+                                <option value="ADAUSDT">ADA/USDT</option>
+                                <option value="SOLUSDT">SOL/USDT</option>
+                                <option value="XRPUSDT">XRP/USDT</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2">Mode</label>
+                            <select id="modeSelect" class="w-full bg-gray-800 rounded-lg px-4 py-2 border border-gray-700 focus:border-purple-500 focus:outline-none">
+                                <option value="simulation">🎮 Simulation</option>
+                                <option value="binance">🟡 Binance</option>
+                                <option value="pancake">💎 PancakeSwap</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2">Capital (USDT)</label>
+                            <input type="number" id="capitalInput" value="100" min="10" class="w-full bg-gray-800 rounded-lg px-4 py-2 border border-gray-700 focus:border-purple-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2">% par trade</label>
+                            <input type="number" id="tradePercentInput" value="10" min="1" max="100" class="w-full bg-gray-800 rounded-lg px-4 py-2 border border-gray-700 focus:border-purple-500 focus:outline-none">
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4 mt-4">
+                        <button id="startBtn" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                            ▶️ Démarrer Bot
+                        </button>
+                        <button id="stopBtn" disabled class="flex-1 bg-gradient-to-r from-red-500 to-rose-500 py-3 rounded-lg font-semibold hover:shadow-lg transition opacity-50">
+                            ⏹️ Arrêter Bot
+                        </button>
+                        <label class="flex items-center gap-2 px-4 bg-gray-800 rounded-lg cursor-pointer">
+                            <input type="checkbox" id="wakeLockToggle" class="w-5 h-5">
+                            <span class="text-sm">🔋 Veille</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Price Chart -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold">📈 Graphique Prix</h2>
+                        <div class="text-3xl font-bold" id="currentPrice">$0.00</div>
+                    </div>
+                    <div class="h-80">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Indicator Values -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                    <h2 class="text-2xl font-bold mb-4">📊 Valeurs des Indicateurs</h2>
+                    <div id="indicatorValues" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center py-4 text-gray-400">Sélectionnez des indicateurs</div>
+                    </div>
+                </div>
+
+                <!-- Trade History -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                    <h2 class="text-2xl font-bold mb-4">📜 Historique des Trades</h2>
+                    <div id="tradesContainer" class="space-y-3 max-h-96 overflow-y-auto">
+                        <div class="text-center py-8 text-gray-400">
+                            <p class="text-4xl mb-2">🤖</p>
+                            <p>Aucun trade pour le moment</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BSC_RPC = 'https://bsc-dataseed1.binance.org';
+        const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+        const USDT_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';
+        
+        const TOKEN_ADDRESSES = {
+            'BTCUSDT': '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c',
+            'ETHUSDT': '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
+            'BNBUSDT': '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+            'ADAUSDT': '0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47',
+            'SOLUSDT': '0x570A5D26f7765Ecb712C0924E4De545B89fD43dF',
+            'XRPUSDT': '0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE'
+        };
+
+        const INDICATORS = {
+            rsi: { name: 'RSI', desc: 'Relative Strength Index', params: { period: 14, overbought: 70, oversold: 30 } },
+            macd: { name: 'MACD', desc: 'Moving Average Convergence', params: { fast: 12, slow: 26, signal: 9 } },
+            ema: { name: 'EMA', desc: 'Exponential Moving Average', params: { period: 20 } },
+            sma: { name: 'SMA', desc: 'Simple Moving Average', params: { period: 50 } },
+            bollinger: { name: 'Bollinger', desc: 'Bollinger Bands', params: { period: 20, stdDev: 2 } },
+            stochastic: { name: 'Stochastic', desc: 'Stochastic Oscillator', params: { k: 14, d: 3 } },
+            williamsR: { name: 'Williams %R', desc: 'Williams Percent Range', params: { period: 14 } },
+            cci: { name: 'CCI', desc: 'Commodity Channel Index', params: { period: 20 } }
+        };
+
+        const ROUTER_ABI = ['function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)', 'function getAmountsOut(uint amountIn, address[] memory path) public view returns (uint[] memory amounts)'];
+        const ERC20_ABI = ['function approve(address spender, uint256 amount) public returns (bool)', 'function allowance(address owner, address spender) public view returns (uint256)', 'function balanceOf(address account) public view returns (uint256)'];
+
+        let state = {
+            wallet: null,
+            provider: null,
+            account: null,
+            binance: { apiKey: null, secretKey: null, connected: false },
+            pair: 'BTCUSDT',
+            mode: 'simulation',
+            currentPrice: 0,
+            priceHistory: [],
+            ohlcvData: [],
+            selectedIndicators: {},
+            indicatorValues: {},
+            botRunning: false,
+            trades: [],
+            profit: 0,
+            position: null,
+            lastBuyPrice: 0,
+            positionAmount: 0
+        };
+
+        let ws = null, klineWs = null, chart = null, botInterval = null, wakeLock = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initIndicatorsList();
+            initChart();
+            connectWebSocket();
+            initKeepAlive();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('walletBtn').addEventListener('click', () => {
+                document.getElementById('walletModal').classList.remove('hidden');
+            });
+            
+            document.getElementById('closeWalletModal').addEventListener('click', () => {
+                document.getElementById('walletModal').classList.add('hidden');
+            });
+            
+            document.getElementById('binanceBtn').addEventListener('click', () => {
+                document.getElementById('binanceModal').classList.remove('hidden');
+            });
+            
+            document.getElementById('closeBinanceModal').addEventListener('click', () => {
+                document.getElementById('binanceModal').classList.add('hidden');
+            });
+            
+            document.getElementById('connectWalletBtn').addEventListener('click', connectWithPrivateKey);
+            document.getElementById('connectBinanceBtn').addEventListener('click', connectBinance);
+            document.getElementById('pairSelect').addEventListener('change', changePair);
+            document.getElementById('modeSelect').addEventListener('change', changeMode);
+            document.getElementById('startBtn').addEventListener('click', startBot);
+            document.getElementById('stopBtn').addEventListener('click', stopBot);
+            document.getElementById('wakeLockToggle').addEventListener('change', toggleWakeLock);
+        }
+
+        function initIndicatorsList() {
+            const container = document.getElementById('indicatorsList');
+            container.innerHTML = Object.entries(INDICATORS).map(([key, ind]) => `
+                <div class="indicator-card bg-gray-800/50 p-4 rounded-lg border border-gray-700" data-indicator="${key}">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-bold">${ind.name}</h4>
+                            <p class="text-xs text-gray-400">${ind.desc}</p>
+                        </div>
+                        <span class="text-2xl">📊</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.querySelectorAll('.indicator-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const key = this.dataset.indicator;
+                    toggleIndicator(key, this);
+                });
+            });
+        }
+
+        function toggleIndicator(key, card) {
+            if (state.selectedIndicators[key]) {
+                delete state.selectedIndicators[key];
+                card.classList.remove('active');
+            } else {
+                state.selectedIndicators[key] = { ...INDICATORS[key] };
+                card.classList.add('active');
+            }
+            document.getElementById('selectedCount').textContent = Object.keys(state.selectedIndicators).length;
+        }
+
+        async function connectWithPrivateKey() {
+            const pk = document.getElementById('privateKeyInput').value.trim();
+            if (!pk) return alert('❌ Entrez une clé privée');
+            
+            try {
+                const privateKey = pk.startsWith('0x') ? pk : '0x' + pk;
+                if (privateKey.length !== 66) return alert('❌ Clé invalide (64 caractères)');
+                
+                state.provider = new ethers.providers.JsonRpcProvider(BSC_RPC);
+                state.wallet = new ethers.Wallet(privateKey, state.provider);
+                state.account = state.wallet.address;
+                
+                document.getElementById('walletModal').classList.add('hidden');
+                await updateWalletInfo();
+                alert('✅ Connecté!\n\n' + state.account.slice(0, 10) + '...');
+            } catch (error) {
+                alert('❌ Erreur: ' + error.message);
+            }
+        }
+
+        async function updateWalletInfo() {
+            if (!state.wallet) return;
+            
+            document.getElementById('walletInfo').classList.remove('hidden');
+            document.getElementById('walletAddress').textContent = state.account.slice(0, 10) + '...' + state.account.slice(-8);
+            document.getElementById('walletBtnText').textContent = 'Connecté';
+            
+            const bnbBalance = await state.provider.getBalance(state.account);
+            document.getElementById('bnbBalance').textContent = parseFloat(ethers.utils.formatEther(bnbBalance)).toFixed(4) + ' BNB';
+            
+            const usdtContract = new ethers.Contract(USDT_CONTRACT, ERC20_ABI, state.provider);
+            const usdtBalance = await usdtContract.balanceOf(state.account);
+            document.getElementById('usdtBalance').textContent = parseFloat(ethers.utils.formatUnits(usdtBalance, 18)).toFixed(2) + ' USDT';
+        }
+
+        async function connectBinance() {
+            const apiKey = document.getElementById('binanceApiKey').value.trim();
+            const secretKey = document.getElementById('binanceSecretKey').value.trim();
+            if (!apiKey || !secretKey) return alert('❌ Entrez les clés API');
+            
+            try {
+                const timestamp = Date.now();
+                const signature = await createBinanceSignature(secretKey, `timestamp=${timestamp}`);
+                const response = await fetch(`https://api.binance.com/api/v3/account?timestamp=${timestamp}&signature=${signature}`, {
+                    headers: { 'X-MBX-APIKEY': apiKey }
+                });
+                
+                if (response.ok) {
+                    state.binance = { apiKey, secretKey, connected: true };
+                    document.getElementById('binanceModal').classList.add('hidden');
+                    alert('✅ Binance API connectée!');
+                } else {
+                    throw new Error((await response.json()).msg);
+                }
+            } catch (error) {
+                alert('❌ Erreur: ' + error.message);
+            }
+        }
+
+        async function createBinanceSignature(secret, queryString) {
+            const encoder = new TextEncoder();
+            const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+            const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(queryString));
+            return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function changePair() {
+            state.pair = document.getElementById('pairSelect').value;
+            state.priceHistory = [];
+            state.ohlcvData = [];
+            connectWebSocket();
+        }
+
+        function changeMode() {
+            state.mode = document.getElementById('modeSelect').value;
+            if (state.mode === 'binance' && !state.binance.connected) {
+                alert('❌ Connectez Binance API');
+                document.getElementById('modeSelect').value = 'simulation';
+                state.mode = 'simulation';
+            } else if (state.mode === 'pancake' && !state.wallet) {
+                alert('❌ Connectez votre wallet');
+                document.getElementById('modeSelect').value = 'simulation';
+                state.mode = 'simulation';
+            }
+        }
+
+        function connectWebSocket() {
+            if (ws) ws.close();
+            if (klineWs) klineWs.close();
+            
+            const symbol = state.pair.toLowerCase();
+            
+            ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol}@trade`);
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                state.currentPrice = parseFloat(data.p);
+                state.priceHistory.push(state.currentPrice);
+                if (state.priceHistory.length > 200) state.priceHistory.shift();
+                document.getElementById('currentPrice').textContent = '$' + state.currentPrice.toFixed(2);
+                if (state.priceHistory.length % 10 === 0) updateChart();
+            };
+            
+            klineWs = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol}@kline_1m`);
+            klineWs.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                if (data.k && data.k.x) {
+                    state.ohlcvData.push({
+                        time: data.k.t,
+                        open: parseFloat(data.k.o),
+                        high: parseFloat(data.k.h),
+                        low: parseFloat(data.k.l),
+                        close: parseFloat(data.k.c),
+                        volume: parseFloat(data.k.v)
+                    });
+                    if (state.ohlcvData.length > 200) state.ohlcvData.shift();
+                    if (state.botRunning) calculateIndicators();
+                }
+            };
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Prix',
+                        data: [],
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#fff' } } },
+                    scales: {
+                        x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!chart || state.priceHistory.length === 0) return;
+            const prices = state.priceHistory.slice(-100);
+            chart.data.labels = prices.map((_, i) => i);
+            chart.data.datasets[0].data = prices;
+            chart.update('none');
+        }
+
+        function startBot() {
+            if (Object.keys(state.selectedIndicators).length === 0) {
+                return alert('❌ Sélectionnez au moins 1 indicateur');
+            }
+            
+            state.botRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('stopBtn').classList.remove('opacity-50');
+            document.getElementById('startBtn').classList.add('opacity-50');
+            
+            botInterval = setInterval(() => {
+                if (state.ohlcvData.length >= 50) {
+                    calculateIndicators();
+                    checkSignals();
+                }
+            }, 15000);
+            
+            console.log('🤖 Bot démarré');
+        }
+
+        function stopBot() {
+            state.botRunning = false;
+            if (botInterval) clearInterval(botInterval);
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('startBtn').classList.remove('opacity-50');
+            document.getElementById('stopBtn').classList.add('opacity-50');
+            console.log('⏹️ Bot arrêté');
+        }
+
+        function calculateIndicators() {
+            if (state.ohlcvData.length < 50) return;
+            
+            const closes = state.ohlcvData.map(d => d.close);
+            const highs = state.ohlcvData.map(d => d.high);
+            const lows = state.ohlcvData.map(d => d.low);
+            
+            state.indicatorValues = {};
+            
+            for (const key of Object.keys(state.selectedIndicators)) {
+                try {
+                    if (key === 'rsi') state.indicatorValues.rsi = calculateRSI(closes, 14);
+                    else if (key === 'macd') state.indicatorValues.macd = calculateMACD(closes);
+                    else if (key === 'ema') state.indicatorValues.ema = calculateEMA(closes, 20);
+                    else if (key === 'sma') state.indicatorValues.sma = calculateSMA(closes, 50);
+                    else if (key === 'bollinger') state.indicatorValues.bollinger = calculateBollinger(closes);
+                    else if (key === 'stochastic') state.indicatorValues.stochastic = calculateStochastic(highs, lows, closes);
+                    else if (key === 'williamsR') state.indicatorValues.williamsR = calculateWilliamsR(highs, lows, closes);
+                    else if (key === 'cci') state.indicatorValues.cci = calculateCCI(highs, lows, closes);
+                } catch (e) {
+                    console.error(`Erreur ${key}:`, e);
+                }
+            }
+            
+            updateIndicatorDisplay();
+        }
+
+        function calculateRSI(prices, period = 14) {
+            let gains = [], losses = [];
+            for (let i = 1; i < prices.length; i++) {
+                const change = prices[i] - prices[i - 1];
+                gains.push(change > 0 ? change : 0);
+                losses.push(change < 0 ? -change : 0);
+            }
+            let avgGain = gains.slice(0, period).reduce((a, b) => a + b, 0) / period;
+            let avgLoss = losses.slice(0, period).reduce((a, b) => a + b, 0) / period;
+            for (let i = period; i < gains.length; i++) {
+                avgGain = ((avgGain * (period - 1)) + gains[i]) / period;
+                avgLoss = ((avgLoss * (period - 1)) + losses[i]) / period;
+            }
+            const rs = avgGain / avgLoss;
+            return (100 - (100 / (1 + rs))).toFixed(2);
+        }
+
+        function calculateMACD(prices) {
+            const ema12 = calculateEMAArray(prices, 12);
+            const ema26 = calculateEMAArray(prices, 26);
+            const macdLine = ema12[ema12.length - 1] - ema26[ema26.length - 1];
+            return macdLine.toFixed(2);
+        }
+
+        function calculateEMA(prices, period) {
+            const k = 2 / (period + 1);
+            let ema = prices.slice(0, period).reduce((a, b) => a + b) / period;
+            for (let i = period; i < prices.length; i++) {
+                ema = prices[i] * k + ema * (1 - k);
+            }
+            return ema.toFixed(2);
+        }
+
+        function calculateEMAArray(prices, period) {
+            const k = 2 / (period + 1);
+            const emaArray = [];
+            let ema = prices.slice(0, period).reduce((a, b) => a + b) / period;
+            emaArray.push(ema);
+            for (let i = period; i < prices.length; i++) {
+                ema = prices[i] * k + ema * (1 - k);
+                emaArray.push(ema);
+            }
+            return emaArray;
+        }
+
+        function calculateSMA(prices, period) {
+            const slice = prices.slice(-period);
+            return (slice.reduce((a, b) => a + b) / period).toFixed(2);
+        }
+
+        function calculateBollinger(prices) {
+            const sma = parseFloat(calculateSMA(prices, 20));
+            const slice = prices.slice(-20);
+            const variance = slice.reduce((sum, price) => sum + Math.pow(price - sma, 2), 0) / 20;
+            const stdDev = Math.sqrt(variance);
+            return {
+                upper: (sma + stdDev * 2).toFixed(2),
+                middle: sma.toFixed(2),
+                lower: (sma - stdDev * 2).toFixed(2)
+            };
+        }
+
+        function calculateStochastic(highs, lows, closes) {
+            const period = 14;
+            const recentHighs = highs.slice(-period);
+            const recentLows = lows.slice(-period);
+            const currentClose = closes[closes.length - 1];
+            const highestHigh = Math.max(...recentHighs);
+            const lowestLow = Math.min(...recentLows);
+            const k = ((currentClose - lowestLow) / (highestHigh - lowestLow)) * 100;
+            return k.toFixed(2);
+        }
+
+        function calculateWilliamsR(highs, lows, closes) {
+            const period = 14;
+            const recentHighs = highs.slice(-period);
+            const recentLows = lows.slice(-period);
+            const currentClose = closes[closes.length - 1];
+            const highestHigh = Math.max(...recentHighs);
+            const lowestLow = Math.min(...recentLows);
+            return (((highestHigh - currentClose) / (highestHigh - lowestLow)) * -100).toFixed(2);
+        }
+
+        function calculateCCI(highs, lows, closes) {
+            const typicalPrices = highs.map((h, i) => (h + lows[i] + closes[i]) / 3);
+            const sma = parseFloat(calculateSMA(typicalPrices, 20));
+            const recentTP = typicalPrices.slice(-20);
+            const meanDeviation = recentTP.reduce((sum, tp) => sum + Math.abs(tp - sma), 0) / 20;
+            const currentTP = typicalPrices[typicalPrices.length - 1];
+            return ((currentTP - sma) / (0.015 * meanDeviation)).toFixed(2);
+        }
+
+        function updateIndicatorDisplay() {
+            const container = document.getElementById('indicatorValues');
+            if (Object.keys(state.indicatorValues).length === 0) {
+                container.innerHTML = '<div class="text-center py-4 text-gray-400 col-span-4">Aucune valeur calculée</div>';
+                return;
+            }
+            
+            container.innerHTML = Object.entries(state.indicatorValues).map(([key, value]) => {
+                const displayValue = typeof value === 'object' ? 
+                    Object.entries(value).map(([k, v]) => `${k}: ${v}`).join('<br>') : value;
+                return `
+                    <div class="bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+                        <p class="text-xs text-gray-400 mb-1">${INDICATORS[key]?.name || key}</p>
+                        <p class="text-sm font-bold">${displayValue}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function checkSignals() {
+            let buySignals = 0, sellSignals = 0;
+            const totalIndicators = Object.keys(state.selectedIndicators).length;
+            
+            if (state.indicatorValues.rsi) {
+                const rsi = parseFloat(state.indicatorValues.rsi);
+                if (rsi < 30) buySignals++;
+                if (rsi > 70) sellSignals++;
+            }
+            
+            if (state.indicatorValues.stochastic) {
+                const stoch = parseFloat(state.indicatorValues.stochastic);
+                if (stoch < 20) buySignals++;
+                if (stoch > 80) sellSignals++;
+            }
+            
+            if (state.indicatorValues.macd) {
+                const macd = parseFloat(state.indicatorValues.macd);
+                if (macd > 0) buySignals++;
+                if (macd < 0) sellSignals++;
+            }
+            
+            if (state.indicatorValues.bollinger) {
+                const currentPrice = state.currentPrice;
+                const lower = parseFloat(state.indicatorValues.bollinger.lower);
+                const upper = parseFloat(state.indicatorValues.bollinger.upper);
+                if (currentPrice < lower) buySignals++;
+                if (currentPrice > upper) sellSignals++;
+            }
+            
+            if (state.indicatorValues.williamsR) {
+                const wr = parseFloat(state.indicatorValues.williamsR);
+                if (wr < -80) buySignals++;
+                if (wr > -20) sellSignals++;
+            }
+            
+            if (state.indicatorValues.cci) {
+                const cci = parseFloat(state.indicatorValues.cci);
+                if (cci < -100) buySignals++;
+                if (cci > 100) sellSignals++;
+            }
+            
+            const buyThreshold = Math.ceil(totalIndicators * 0.6);
+            const sellThreshold = Math.ceil(totalIndicators * 0.6);
+            
+            if (buySignals >= buyThreshold && !state.position) {
+                console.log(`🟢 Signal ACHAT: ${buySignals}/${totalIndicators}`);
+                executeTrade('BUY');
+            } else if (sellSignals >= sellThreshold && state.position) {
+                console.log(`🔴 Signal VENTE: ${sellSignals}/${totalIndicators}`);
+                executeTrade('SELL');
+            }
+        }
+
+        async function executeTrade(type) {
+            const capital = parseFloat(document.getElementById('capitalInput').value);
+            const percent = parseFloat(document.getElementById('tradePercentInput').value);
+            const amount = (capital * percent / 100);
+            
+            if (state.mode === 'binance') {
+                await executeBinanceTrade(type, amount);
+            } else if (state.mode === 'pancake') {
+                await executePancakeTrade(type, amount);
+            } else {
+                executeSimulationTrade(type, amount);
+            }
+        }
+
+        function executeSimulationTrade(type, amount) {
+            let profit = 0, profitPercent = 0;
+            
+            if (type === 'BUY') {
+                state.position = 'LONG';
+                state.lastBuyPrice = state.currentPrice;
+                state.positionAmount = amount;
+            } else if (type === 'SELL' && state.position) {
+                profitPercent = ((state.currentPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
+                profit = state.positionAmount * (profitPercent / 100);
+                state.profit += profit;
+                state.position = null;
+            }
+            
+            addTrade({
+                type,
+                pair: state.pair,
+                price: state.currentPrice.toFixed(6),
+                amount: amount.toFixed(2),
+                profit: profit.toFixed(2),
+                profitPercent: profitPercent.toFixed(2),
+                mode: 'simulation'
+            });
+        }
+
+        async function executeBinanceTrade(type, amount) {
+            if (!state.binance.connected) return;
+            
+            try {
+                const symbol = state.pair;
+                const timestamp = Date.now();
+                let orderId = null;
+                
+                if (type === 'BUY') {
+                    const params = `symbol=${symbol}&side=BUY&type=MARKET&quoteOrderQty=${amount}&timestamp=${timestamp}`;
+                    const signature = await createBinanceSignature(state.binance.secretKey, params);
+                    
+                    const response = await fetch(`https://api.binance.com/api/v3/order?${params}&signature=${signature}`, {
+                        method: 'POST',
+                        headers: { 'X-MBX-APIKEY': state.binance.apiKey }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        orderId = data.orderId;
+                        state.position = 'LONG';
+                        state.lastBuyPrice = state.currentPrice;
+                        state.positionAmount = amount;
+                    }
+                } else if (type === 'SELL' && state.position) {
+                    const accountParams = `timestamp=${timestamp}`;
+                    const accountSig = await createBinanceSignature(state.binance.secretKey, accountParams);
+                    const accountResp = await fetch(`https://api.binance.com/api/v3/account?${accountParams}&signature=${accountSig}`, {
+                        headers: { 'X-MBX-APIKEY': state.binance.apiKey }
+                    });
+                    
+                    if (accountResp.ok) {
+                        const accountData = await accountResp.json();
+                        const baseAsset = symbol.replace('USDT', '');
+                        const balance = accountData.balances.find(b => b.asset === baseAsset);
+                        
+                        if (balance && parseFloat(balance.free) > 0) {
+                            const qty = parseFloat(balance.free);
+                            const sellParams = `symbol=${symbol}&side=SELL&type=MARKET&quantity=${qty}&timestamp=${timestamp}`;
+                            const sellSig = await createBinanceSignature(state.binance.secretKey, sellParams);
+                            
+                            const sellResp = await fetch(`https://api.binance.com/api/v3/order?${sellParams}&signature=${sellSig}`, {
+                                method: 'POST',
+                                headers: { 'X-MBX-APIKEY': state.binance.apiKey }
+                            });
+                            
+                            if (sellResp.ok) {
+                                const data = await sellResp.json();
+                                orderId = data.orderId;
+                                const profitPercent = ((state.currentPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
+                                const profit = state.positionAmount * (profitPercent / 100);
+                                state.profit += profit;
+                                state.position = null;
+                            }
+                        }
+                    }
+                }
+                
+                addTrade({
+                    type,
+                    pair: state.pair,
+                    price: state.currentPrice.toFixed(6),
+                    amount: amount.toFixed(2),
+                    profit: '0.00',
+                    profitPercent: '0.00',
+                    mode: 'binance',
+                    orderId
+                });
+                
+            } catch (error) {
+                console.error('Erreur Binance:', error);
+            }
+        }
+
+        async function executePancakeTrade(type, amount) {
+            if (!state.wallet) return;
+            
+            try {
+                const tokenAddress = TOKEN_ADDRESSES[state.pair];
+                const routerContract = new ethers.Contract(PANCAKE_ROUTER, ROUTER_ABI, state.wallet);
+                
+                if (type === 'BUY') {
+                    const usdtContract = new ethers.Contract(USDT_CONTRACT, ERC20_ABI, state.wallet);
+                    const amountIn = ethers.utils.parseUnits(amount.toString(), 18);
+                    
+                    const allowance = await usdtContract.allowance(state.account, PANCAKE_ROUTER);
+                    if (allowance.lt(amountIn)) {
+                        const approveTx = await usdtContract.approve(PANCAKE_ROUTER, ethers.constants.MaxUint256);
+                        await approveTx.wait();
+                    }
+                    
+                    const path = [USDT_CONTRACT, tokenAddress];
+                    const amountsOut = await routerContract.getAmountsOut(amountIn, path);
+                    const amountOutMin = amountsOut[1].mul(99).div(100);
+                    const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
+                    
+                    const swapTx = await routerContract.swapExactTokensForTokens(amountIn, amountOutMin, path, state.account, deadline, { gasLimit: 300000 });
+                    await swapTx.wait();
+                    
+                    state.position = 'LONG';
+                    state.lastBuyPrice = state.currentPrice;
+                    state.positionAmount = amount;
+                    
+                    addTrade({
+                        type,
+                        pair: state.pair,
+                        price: state.currentPrice.toFixed(6),
+                        amount: amount.toFixed(2),
+                        profit: '0.00',
+                        profitPercent: '0.00',
+                        mode: 'pancake',
+                        txHash: swapTx.hash
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur PancakeSwap:', error);
+            }
+        }
+
+        function addTrade(trade) {
+            const tradeElement = {
+                ...trade,
+                time: new Date().toLocaleTimeString('fr-FR'),
+                date: new Date().toLocaleDateString('fr-FR')
+            };
+            
+            state.trades.unshift(tradeElement);
+            state.trades = state.trades.slice(0, 50);
+            renderTrades();
+            updateProfitDisplay();
+            playSound();
+        }
+
+        function renderTrades() {
+            const container = document.getElementById('tradesContainer');
+            if (state.trades.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-400"><p class="text-4xl mb-2">🤖</p><p>Aucun trade</p></div>';
+                return;
+            }
+            
+            container.innerHTML = state.trades.map(t => `
+                <div class="bg-gray-800/50 p-4 rounded-lg border-l-4 ${t.type === 'BUY' ? 'border-green-500' : 'border-red-500'}">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-2xl">${t.type === 'BUY' ? '🟢' : '🔴'}</span>
+                                <span class="font-bold">${t.type}</span>
+                                <span class="text-xs bg-purple-500/20 px-2 py-1 rounded">${t.pair}</span>
+                                ${t.mode === 'binance' ? '<span class="text-xs bg-yellow-500/20 px-2 py-1 rounded">🟡 BIN</span>' : 
+                                  t.mode === 'pancake' ? '<span class="text-xs bg-orange-500/20 px-2 py-1 rounded">💎 CAKE</span>' : 
+                                  '<span class="text-xs bg-blue-500/20 px-2 py-1 rounded">🎮 SIM</span>'}
+                            </div>
+                            <p class="text-xs text-gray-400">${t.date} ${t.time}</p>
+                            <p class="text-sm font-mono mt-1">Prix: ${t.price}</p>
+                            <p class="text-sm">Montant: ${t.amount} USDT</p>
+                            ${t.orderId ? `<p class="text-xs text-yellow-400">Order: ${t.orderId}</p>` : ''}
+                            ${t.txHash ? `<a href="https://bscscan.com/tx/${t.txHash}" target="_blank" class="text-xs text-blue-400 underline">BSCScan</a>` : ''}
+                        </div>
+                        ${t.type === 'SELL' ? `
+                            <div class="text-right">
+                                <p class="text-lg font-bold ${parseFloat(t.profit) >= 0 ? 'text-green-400' : 'text-red-400'}">
+                                    ${parseFloat(t.profit) >= 0 ? '+' : ''}${t.profit} USDT
+                                </p>
+                                <p class="text-sm ${parseFloat(t.profitPercent) >= 0 ? 'text-green-400' : 'text-red-400'}">
+                                    ${parseFloat(t.profitPercent) >= 0 ? '+' : ''}${t.profitPercent}%
+                                </p>
+                            </div>
+                        ` : '<div class="text-sm text-purple-400">Position ouverte</div>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateProfitDisplay() {
+            const profitEl = document.getElementById('totalProfit');
+            profitEl.textContent = ' + state.profit.toFixed(2);
+            profitEl.className = `text-lg font-bold ${state.profit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+        }
+
+        async function toggleWakeLock() {
+            const toggle = document.getElementById('wakeLockToggle');
+            if (toggle.checked) {
+                try {
+                    if ('wakeLock' in navigator) {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                        console.log('🔋 Wake Lock activé');
+                        wakeLock.addEventListener('release', () => console.log('🔋 Wake Lock désactivé'));
+                    } else {
+                        alert('⚠️ Wake Lock non supporté');
+                        toggle.checked = false;
+                    }
+                } catch (e) {
+                    alert('❌ Erreur Wake Lock: ' + e.message);
+                    toggle.checked = false;
+                }
+            } else if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        function initKeepAlive() {
+            setInterval(() => {
+                if (state.botRunning) {
+                    console.log('💓 Keep Alive');
+                    if (!ws || ws.readyState === WebSocket.CLOSED) connectWebSocket();
+                }
+            }, 30000);
+        }
+
+        function playSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 800;
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.5);
+            } catch (e) {}
+        }
+
+        window.addEventListener('beforeunload', (e) => {
+            if (state.botRunning) {
+                e.preventDefault();
+                e.returnValue = 'Bot actif. Quitter ?';
+            }
+        });
+    </script>
+</body>
+</html>
     <title>Bot Trading Pro - Tous Indicateurs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
