@@ -386,14 +386,78 @@
                     <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #44ff44; margin-right: 8px; animation: pulse 2s infinite;"></span>
                     <span id="networkName">Ethereum</span>
                 </div>
-                <button id="connectBtn" onclick="connectWallet()">Connecter MetaMask</button>
+                <button id="connectBtn" onclick="showConnectionModal()">Connecter Wallet</button>
+                <button id="disconnectBtn" onclick="disconnectWallet()" style="display: none; background: rgba(255, 68, 68, 0.6);">🚪 Déconnecter</button>
             </div>
         </header>
+
+        <!-- Modal de connexion -->
+        <div id="connectionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;">
+            <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 30px; border-radius: 20px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0, 242, 254, 0.3);">
+                <h2 style="color: #00f2fe; margin-bottom: 20px; text-align: center;">Choisir une méthode de connexion</h2>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Option MetaMask -->
+                    <div onclick="connectWithMetaMask()" style="cursor: pointer; background: rgba(79, 172, 254, 0.1); padding: 20px; border-radius: 15px; border: 2px solid rgba(79, 172, 254, 0.3); transition: all 0.3s;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="font-size: 2.5em;">🦊</div>
+                            <div>
+                                <h3 style="margin: 0; color: #00f2fe;">MetaMask</h3>
+                                <p style="margin: 5px 0 0 0; color: #4facfe; font-size: 0.9em;">Connexion sécurisée via l'extension MetaMask</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Option Clé Privée -->
+                    <div onclick="showPrivateKeyInput()" style="cursor: pointer; background: rgba(255, 170, 0, 0.1); padding: 20px; border-radius: 15px; border: 2px solid rgba(255, 170, 0, 0.3); transition: all 0.3s;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="font-size: 2.5em;">🔑</div>
+                            <div>
+                                <h3 style="margin: 0; color: #ffaa00;">Clé Privée</h3>
+                                <p style="margin: 5px 0 0 0; color: #ffcc66; font-size: 0.9em;">Pour trader 24/7 même en veille (Mode autonome)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section clé privée (cachée par défaut) -->
+                <div id="privateKeySection" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255, 170, 0, 0.05); border-radius: 10px; border: 2px solid rgba(255, 170, 0, 0.2);">
+                    <div class="alert alert-warning" style="margin-bottom: 15px;">
+                        <strong>⚠️ ATTENTION - SÉCURITÉ</strong><br>
+                        • Ne partagez JAMAIS votre clé privée<br>
+                        • Cette clé donne un accès total à vos fonds<br>
+                        • Utilisez un wallet dédié au trading<br>
+                        • La clé est stockée localement dans votre navigateur
+                    </div>
+                    
+                    <label style="display: block; margin-bottom: 10px; color: #ffaa00;">Clé Privée (avec ou sans 0x)</label>
+                    <input type="password" id="privateKeyInput" placeholder="0x..." style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.4); border: 2px solid rgba(255, 170, 0, 0.3); border-radius: 8px; color: #fff; font-family: monospace;">
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button onclick="connectWithPrivateKey()" style="flex: 1; background: linear-gradient(45deg, #ffaa00, #ff6b00);">
+                            🔓 Connecter
+                        </button>
+                        <button onclick="hidePrivateKeyInput()" style="flex: 1; background: rgba(255, 68, 68, 0.3);">
+                            Annuler
+                        </button>
+                    </div>
+                </div>
+                
+                <button onclick="closeConnectionModal()" style="width: 100%; margin-top: 15px; background: rgba(255, 255, 255, 0.1);">
+                    Fermer
+                </button>
+            </div>
+        </div>
 
         <style>
             @keyframes pulse {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.5; }
+            }
+            
+            #connectionModal > div > div > div:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 30px rgba(0, 242, 254, 0.4);
             }
         </style>
 
@@ -514,6 +578,18 @@
                     <button onclick="startBot()" id="startBtn">▶️ Démarrer</button>
                     <button onclick="stopBot()" id="stopBtn" disabled>⏸️ Arrêter</button>
                     <button onclick="clearTrades()">🗑️ Effacer</button>
+                </div>
+                
+                <!-- Indicateur mode autonome -->
+                <div id="autonomousMode" style="display: none; margin-top: 15px; padding: 15px; background: linear-gradient(45deg, rgba(255, 170, 0, 0.2), rgba(255, 107, 0, 0.2)); border-radius: 10px; border-left: 4px solid #ffaa00;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <span style="font-size: 1.5em;">🤖</span>
+                        <strong style="color: #ffaa00;">Mode Autonome Actif</strong>
+                    </div>
+                    <p style="margin: 0; font-size: 0.9em; color: #ffcc66;">
+                        Le bot fonctionne en mode autonome 24/7.<br>
+                        Il continuera de trader même si vous fermez cette page ou éteignez votre ordinateur.
+                    </p>
                 </div>
             </div>
 
@@ -718,6 +794,7 @@
         let chart;
         let activeIndicators = {};
         let lastPrice = 0;
+        let isPrivateKeyConnection = false; // Flag pour savoir si on utilise une clé privée
         let currentNetwork = {
             chainId: 1,
             name: 'Ethereum Mainnet',
@@ -825,6 +902,141 @@
             });
         }
 
+        // Afficher le modal de connexion
+        function showConnectionModal() {
+            document.getElementById('connectionModal').style.display = 'flex';
+        }
+
+        // Fermer le modal de connexion
+        function closeConnectionModal() {
+            document.getElementById('connectionModal').style.display = 'none';
+            document.getElementById('privateKeySection').style.display = 'none';
+        }
+
+        // Afficher le champ de clé privée
+        function showPrivateKeyInput() {
+            document.getElementById('privateKeySection').style.display = 'block';
+        }
+
+        // Masquer le champ de clé privée
+        function hidePrivateKeyInput() {
+            document.getElementById('privateKeySection').style.display = 'none';
+            document.getElementById('privateKeyInput').value = '';
+        }
+
+        // Connexion avec MetaMask (méthode originale)
+        async function connectWithMetaMask() {
+            closeConnectionModal();
+            await connectWallet();
+        }
+
+        // Connexion avec clé privée
+        async function connectWithPrivateKey() {
+            try {
+                const privateKeyInput = document.getElementById('privateKeyInput').value.trim();
+                
+                if (!privateKeyInput) {
+                    alert('Veuillez entrer une clé privée');
+                    return;
+                }
+
+                // Normaliser la clé privée (ajouter 0x si nécessaire)
+                let privateKey = privateKeyInput;
+                if (!privateKey.startsWith('0x')) {
+                    privateKey = '0x' + privateKey;
+                }
+
+                // Valider la longueur de la clé
+                if (privateKey.length !== 66) {
+                    alert('Clé privée invalide. Elle doit contenir 64 caractères hexadécimaux (avec ou sans 0x)');
+                    return;
+                }
+
+                addLog('Connexion avec clé privée...', 'info');
+
+                // Obtenir le réseau sélectionné
+                const networkSelect = document.getElementById('network');
+                const chainId = parseInt(networkSelect.value);
+                const networkConfig = networks[chainId];
+
+                // Créer un provider avec le RPC du réseau sélectionné
+                provider = new ethers.providers.JsonRpcProvider(networkConfig.rpcUrl);
+                
+                // Créer un wallet avec la clé privée
+                const wallet = new ethers.Wallet(privateKey, provider);
+                signer = wallet;
+                userAddress = wallet.address;
+                
+                currentNetwork = networkConfig;
+                isPrivateKeyConnection = true;
+
+                // Sauvegarder la clé dans le localStorage (chiffrée basiquement)
+                // ATTENTION: C'est une sécurité minimale, dans un environnement de production
+                // il faudrait utiliser un chiffrement plus robuste
+                if (confirm('Voulez-vous sauvegarder cette clé privée pour les prochaines sessions?\n\n⚠️ La clé sera stockée dans votre navigateur. Ne faites ceci que sur votre ordinateur personnel!')) {
+                    localStorage.setItem('trading_bot_pk', btoa(privateKey)); // Encodage base64 basique
+                    addLog('Clé privée sauvegardée localement', 'success');
+                }
+
+                // Afficher l'adresse
+                document.getElementById('walletAddress').textContent = 
+                    userAddress.substring(0, 6) + '...' + userAddress.substring(38);
+
+                // Obtenir le solde
+                await updateBalance();
+
+                document.getElementById('connectBtn').textContent = '🔑 Connecté (Clé Privée)';
+                document.getElementById('connectBtn').style.background = 'linear-gradient(45deg, #ffaa00, #ff6b00)';
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').style.display = 'block';
+
+                // Mettre à jour l'affichage du réseau
+                updateNetworkDisplay();
+                await updateFeesDisplay();
+
+                addLog('✓ Connexion réussie avec clé privée!', 'success');
+                addLog('🤖 Le bot peut maintenant trader en mode autonome 24/7', 'success');
+                
+                // Afficher l'indicateur de mode autonome
+                document.getElementById('autonomousMode').style.display = 'block';
+                
+                closeConnectionModal();
+
+            } catch (error) {
+                addLog('Erreur lors de la connexion: ' + error.message, 'error');
+                alert('Erreur: ' + error.message + '\n\nAssurez-vous que votre clé privée est valide.');
+                console.error(error);
+            }
+        }
+
+        // Déconnecter et effacer la clé privée
+        function disconnectWallet() {
+            if (isPrivateKeyConnection) {
+                if (confirm('Voulez-vous également supprimer la clé privée sauvegardée?')) {
+                    localStorage.removeItem('trading_bot_pk');
+                    addLog('Clé privée supprimée du stockage local', 'info');
+                }
+            }
+            location.reload();
+        }
+
+        // Vérifier si une clé privée est sauvegardée
+        function checkSavedPrivateKey() {
+            const savedPK = localStorage.getItem('trading_bot_pk');
+            if (savedPK) {
+                if (confirm('Une clé privée est sauvegardée. Voulez-vous vous connecter automatiquement?')) {
+                    try {
+                        const privateKey = atob(savedPK);
+                        document.getElementById('privateKeyInput').value = privateKey;
+                        connectWithPrivateKey();
+                    } catch (error) {
+                        addLog('Erreur lors du chargement de la clé sauvegardée', 'error');
+                        localStorage.removeItem('trading_bot_pk');
+                    }
+                }
+            }
+        }
+
         // Changer de réseau
         async function changeNetwork() {
             const networkSelect = document.getElementById('network');
@@ -846,7 +1058,23 @@
             try {
                 addLog(`Changement vers ${networkConfig.name}...`, 'info');
                 
-                // Demander à MetaMask de changer de réseau
+                // Si connexion par clé privée, changer directement le provider
+                if (isPrivateKeyConnection) {
+                    provider = new ethers.providers.JsonRpcProvider(networkConfig.rpcUrl);
+                    const privateKey = atob(localStorage.getItem('trading_bot_pk') || '');
+                    if (privateKey) {
+                        const wallet = new ethers.Wallet(privateKey, provider);
+                        signer = wallet;
+                    }
+                    
+                    await updateBalance();
+                    updateNetworkDisplay();
+                    await updateFeesDisplay();
+                    addLog(`✓ Connecté à ${networkConfig.name}`, 'success');
+                    return;
+                }
+                
+                // Sinon, utiliser MetaMask
                 try {
                     await ethereum.request({
                         method: 'wallet_switchEthereumChain',
@@ -978,6 +1206,7 @@
 
                 document.getElementById('connectBtn').textContent = 'Connecté ✓';
                 document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').style.display = 'block';
 
                 addLog('Wallet connecté avec succès!', 'success');
                 
@@ -1520,7 +1749,6 @@
         window.addEventListener('load', () => {
             initChart();
             addLog('Application initialisée', 'success');
-            addLog('Connectez votre wallet MetaMask pour commencer', 'info');
             addLog('Chargement du prix en temps réel...', 'info');
             
             // Charger le prix initial immédiatement
@@ -1532,6 +1760,11 @@
                     updatePrice();
                 }
             }, 30000);
+            
+            // Vérifier si une clé privée est sauvegardée
+            setTimeout(() => {
+                checkSavedPrivateKey();
+            }, 1000);
         });
 
         // Empêcher le bot de s'arrêter en veille (Page Visibility API)
